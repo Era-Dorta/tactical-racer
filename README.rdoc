@@ -1,4 +1,5 @@
-= CHINGU
+= TACTICAL RACER
+
 
 == DESCRIPTION
-Computer cience on development final year proyect.
+Computer cience final year proyect on development.
