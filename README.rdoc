@@ -2,4 +2,4 @@
 
 
 == DESCRIPTION
-Computer cience final year proyect on development.
+Computer cience final year project on development.
