@@ -22,8 +22,7 @@
 #!/usr/bin/env ruby
 require 'rubygems' rescue nil
 $LOAD_PATH.unshift File.join(File.expand_path(__FILE__), "..", "..", "lib")
-require '../chingu/lib/chungu.rb'
-require 'Qt4'
+require '../chingu/lib/chingu.rb'
 include Gosu
 include Chingu
 
@@ -62,40 +61,13 @@ end
 
 end
 
- class SoloButton < PressButton
-  def initialize(options = {})
-    puts "solo ejec"
-    @animations = Chingu::Animation.new(:file => "../media/menu/solo-game-menu.png",  :size => [100,20])
-    puts @animations
-    super
-  end
-
-end
-
-
- class OnlineButton < PressButton
-  def initialize(options = {})
-    puts "onlie ejec"
-    @animations = Chingu::Animation.new(:file => "../media/menu/online-game-menu.png")
-    super
-  end
-
-end
-
-class MultiplayerButton < PressButton
-  def initialize(options = {})
-    puts "onlie ejec"
-    @animations = Chingu::Animation.new(:file => "../media/menu/online-game-menu.png")
-    super
-  end
-end
-
  class EntryMenu < Chingu::GameState
   def initialize(options = {})
     super
-    @song = Song["../media/music/cave.ogg"].play(true)
+   # @song = Song["../media/music/cave.ogg"].play(true)
     @level = GameObject.create(:image => "../media/menu/menu-background.png", :rotation_center => :top_left)
-    @soloButton = SoloButton.create(:x => 300, :y => 500)
+    @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :released_image => "../media/menu/solo-game-button-unpressed.png",
+      :pressed_image => "../media/menu/solo-game-button-pressed.png")
     #   @onlineButton = OnlineButton.create(:x => 300, :y => 300 )
     #  @multiplayerButton = MultiplayerButton.create(:x => 300, :y => 300 )
 
@@ -120,11 +92,12 @@ end
   #
   def initialize(options = {})
     super
-    @song = Song["../media/music/cave.ogg"].play(true)
+  #  @song = Song["../media/music/cave.ogg"].play(true)
     @title = Chingu::Text.create(:text=>"Level #{options[:level].to_s}. P: pause R:restart", :x=>20, :y=>10, :size=>30)
     @level = GameObject.create(:image => "../media/graphics/map1.png", :rotation_center => :top_left)
     @player = Player.create
-    @button = SoloButton.create(:x => 300, :y => 500)
+    @button = Chingu::PressButton.create(:x => 300, :y => 500, :pressed_image => "../media/menu/solo-game-button-pressed.png",
+      :released_image => "../media/menu/solo-game-button-unpressed.png")
     #
     # The below code can mostly be replaced with the use of methods "holding?", "holding_all?" or "holding_any?" in Level#update
     # Using holding? in update could be good if you need fine grained controll over when input is dispatched.
