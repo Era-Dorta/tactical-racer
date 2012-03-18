@@ -23,13 +23,16 @@
 require 'rubygems' rescue nil
 $LOAD_PATH.unshift File.join(File.expand_path(__FILE__), "..", "..", "lib")
 require '../chingu/lib/chingu.rb'
+#require 'chingu'
 include Gosu
 include Chingu
 
 class Game < Chingu::Window
   def initialize
-    super(600,600)
+    super(800,600, true)
     puts "game created"
+    #To give a nice old pixeled look
+    retrofy
     #Show cursor
     $window.cursor = true
     #First state is menu
@@ -64,19 +67,35 @@ end
  class EntryMenu < Chingu::GameState
   def initialize(options = {})
     super
-   # @song = Song["../media/music/cave.ogg"].play(true)
+ #   @song = Song["../media/music/cave.ogg"].play(true)
     @level = GameObject.create(:image => "../media/menu/menu-background.png", :rotation_center => :top_left)
     @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :released_image => "../media/menu/solo-game-button-unpressed.png",
       :pressed_image => "../media/menu/solo-game-button-pressed.png")
-    #   @onlineButton = OnlineButton.create(:x => 300, :y => 300 )
-    #  @multiplayerButton = MultiplayerButton.create(:x => 300, :y => 300 )
+    @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "../media/menu/online-game-button-unpressed.png",
+      :pressed_image => "../media/menu/online-game-button-pressed.png")
+    @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :released_image => "../media/menu/multiplayer-game-button-unpressed.png",
+      :pressed_image => "../media/menu/multiplayer-game-button-pressed.png")
 
-    @soloButton.on_click do
-      puts "cambiando"
-      switch_game_state(Level)
-      puts "cambiado"
+    @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :released_image => "../media/menu/exit-game-button.png",
+      :pressed_image => "../media/menu/exit-game-button.png")
+      
+    @exitButton.on_click do
+      $window.close
+      exit
     end
-
+    
+    @soloButton.on_click do
+      puts "Llendo a solo game"
+    end
+    
+    @onlineButton.on_click do
+      puts "Llendo a online game"
+    end    
+    
+    @multiplayerButton.on_click do
+      puts "Llendo a multiplayer game"
+      switch_game_state(Map1)
+    end
   end
 
   def update
@@ -86,29 +105,28 @@ end
 
 end  
 
- class Level < Chingu::GameState
+ class Map1 < Chingu::GameState
   #
   # initialize() is called when you create the game state
   #
   def initialize(options = {})
     super
-  #  @song = Song["../media/music/cave.ogg"].play(true)
     @title = Chingu::Text.create(:text=>"Level #{options[:level].to_s}. P: pause R:restart", :x=>20, :y=>10, :size=>30)
     @level = GameObject.create(:image => "../media/graphics/map1.png", :rotation_center => :top_left)
+    @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :released_image => "../media/menu/exit-game-button.png",
+      :pressed_image => "../media/menu/exit-game-button.png")
+      
+    @exitButton.on_click do
+      $window.close
+      exit
+    end
+        
     @player = Player.create
-    @button = Chingu::PressButton.create(:x => 300, :y => 500, :pressed_image => "../media/menu/solo-game-button-pressed.png",
-      :released_image => "../media/menu/solo-game-button-unpressed.png")
-    #
-    # The below code can mostly be replaced with the use of methods "holding?", "holding_all?" or "holding_any?" in Level#update
-    # Using holding? in update could be good if you need fine grained controll over when input is dispatched.
-    #
-=begin
-    @player.input = {  :holding_left => :move_left,
-    :holding_right => :move_right,
-    :holding_up => :move_up,
-    :holding_down => :move_down,
-    }
-=end
+    @tiles = []
+    10.times do |i|
+      @tiles.push PressButton.create(:x => 100, :y => (i*50 + 10), :released_image => "../media/graphics/yellow-tile.png",
+        :pressed_image => "../media/graphics/yellow-tile.png" )
+    end
     #
     # The input-handler understands gamestates. P is pressed --> push_gamegate(Pause)
     # You can also give it Procs/Lambdas which it will execute when key is pressed.
@@ -127,7 +145,7 @@ end
     # @player.move_up     if holding_any?(:up, :w)
     # @player.move_down   if holding_any?(:down, :s)
     # @player.fire        if holding?(:space)
-    @image = Image["../media/graphics/map1.png"]
+  #  @image = Image["../media/graphics/map1.png"]
     $window.caption = "FPS: #{$window.fps} - GameObjects: #{game_objects.size} "
   end
 
@@ -147,26 +165,22 @@ end
 
 end
 
- class Level2 < Chingu::GameState
+ class Level < Chingu::GameState
   #
   # initialize() is called when you create the game state
   #
   def initialize(options = {})
     super
-    @song = Song["../media/music/cave.ogg"].play(true)
+  #  @song = Song["../media/music/cave.ogg"].play(true)
     @title = Chingu::Text.create(:text=>"Level #{options[:level].to_s}. P: pause R:restart", :x=>20, :y=>10, :size=>30)
-    @level = GameObject.create(:image => "../media/graphics/car1.png", :rotation_center => :top_left)
+    @level = GameObject.create(:image => "../media/graphics/map1.png", :rotation_center => :top_left)
     @player = Player.create
+    @button = Chingu::PressButton.create(:x => 300, :y => 500, :pressed_image => "../media/menu/solo-game-button-pressed.png",
+      :released_image => "../media/menu/solo-game-button-unpressed.png")
     #
     # The below code can mostly be replaced with the use of methods "holding?", "holding_all?" or "holding_any?" in Level#update
     # Using holding? in update could be good if you need fine grained controll over when input is dispatched.
     #
-
-    @player.input = {  :holding_left => :move_left,
-      :holding_right => :move_right,
-      :holding_up => :move_up,
-      :holding_down => :move_down,
-    }
 
     #
     # The input-handler understands gamestates. P is pressed --> push_gamegate(Pause)
