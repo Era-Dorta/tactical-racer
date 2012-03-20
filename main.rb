@@ -43,7 +43,7 @@ end
  class Player < Chingu::GameObject
   def initialize(options = {})
     super
-    @image = Image["../media/graphics/car1.png"]
+    @image = Image["./media/graphics/car1.png"]
   end
 
   def move_left;  @x -= 6; end
@@ -67,17 +67,17 @@ end
  class EntryMenu < Chingu::GameState
   def initialize(options = {})
     super
- #   @song = Song["../media/music/cave.ogg"].play(true)
-    @level = GameObject.create(:image => "../media/menu/menu-background.png", :rotation_center => :top_left)
-    @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :released_image => "../media/menu/solo-game-button-unpressed.png",
-      :pressed_image => "../media/menu/solo-game-button-pressed.png")
-    @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "../media/menu/online-game-button-unpressed.png",
-      :pressed_image => "../media/menu/online-game-button-pressed.png")
-    @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :released_image => "../media/menu/multiplayer-game-button-unpressed.png",
-      :pressed_image => "../media/menu/multiplayer-game-button-pressed.png")
+ #   @song = Song["./media/music/cave.ogg"].play(true)
+    @level = GameObject.create(:image => "./media/menu/menu-background.png", :rotation_center => :top_left)
+    @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :released_image => "./media/menu/solo-game-button-unpressed.png",
+      :pressed_image => "./media/menu/solo-game-button-pressed.png")
+    @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "./media/menu/online-game-button-unpressed.png",
+      :pressed_image => "./media/menu/online-game-button-pressed.png")
+    @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :released_image => "./media/menu/multiplayer-game-button-unpressed.png",
+      :pressed_image => "./media/menu/multiplayer-game-button-pressed.png")
 
-    @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :released_image => "../media/menu/exit-game-button.png",
-      :pressed_image => "../media/menu/exit-game-button.png")
+    @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :released_image => "./media/menu/exit-game-button.png",
+      :pressed_image => "./media/menu/exit-game-button.png")
       
     @exitButton.on_click do
       $window.close
@@ -109,9 +109,9 @@ end
   def initialize(options = {})
     super
     @title = Chingu::Text.create(:text=>"Level #{options[:level].to_s}. P: pause R:restart", :x=>20, :y=>10, :size=>30)
-    @level = GameObject.create(:image => "../media/graphics/map1.png", :rotation_center => :top_left)
-    @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :released_image => "../media/menu/exit-game-button.png",
-      :pressed_image => "../media/menu/exit-game-button.png")
+    @level = GameObject.create(:image => "./media/graphics/map1.png", :rotation_center => :top_left)
+    @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :released_image => "./media/menu/exit-game-button.png",
+      :pressed_image => "./media/menu/exit-game-button.png")
       
     @exitButton.on_click do
       $window.close
@@ -119,14 +119,14 @@ end
     end
     @tiles = []
     9.times do |i|
-      @tiles.push PressButton.create(:x => 100, :y => (i*50 + 80), :released_image => "../media/graphics/vertical.png",
-        :pressed_image => "../media/graphics/vertical.png" )
+      @tiles.push PressButton.create(:x => 100, :y => (i*50 + 80), :released_image => "./media/graphics/vertical.png",
+        :pressed_image => "./media/graphics/vertical.png" )
     end
-    @tiles.push PressButton.create(:x => 100, :y => 530, :released_image => "../media/graphics/turn-bot-left.png",
-      :pressed_image => "../media/graphics/turn-bot-left.png" )    
+    @tiles.push PressButton.create(:x => 100, :y => 530, :released_image => "./media/graphics/turn-bot-left.png",
+      :pressed_image => "./media/graphics/turn-bot-left.png" )    
     4.times do |i|
-      @tiles.push PressButton.create(:x => (i*50 + 150), :y => 530, :released_image => "../media/graphics/horizontal.png",
-        :pressed_image => "../media/graphics/horizontal.png" )
+      @tiles.push PressButton.create(:x => (i*50 + 150), :y => 530, :released_image => "./media/graphics/horizontal.png",
+        :pressed_image => "./media/graphics/horizontal.png" )
     end  
     #Objects are draw in order, so player must be last one
     @tiles.each do |i|
@@ -155,7 +155,7 @@ end
     # @player.move_up     if holding_any?(:up, :w)
     # @player.move_down   if holding_any?(:down, :s)
     # @player.fire        if holding?(:space)
-  #  @image = Image["../media/graphics/map1.png"]
+  #  @image = Image["./media/graphics/map1.png"]
     $window.caption = "FPS: #{$window.fps} - GameObjects: #{game_objects.size} "
   end
 
@@ -181,12 +181,12 @@ end
   #
   def initialize(options = {})
     super
-  #  @song = Song["../media/music/cave.ogg"].play(true)
+  #  @song = Song["./media/music/cave.ogg"].play(true)
     @title = Chingu::Text.create(:text=>"Level #{options[:level].to_s}. P: pause R:restart", :x=>20, :y=>10, :size=>30)
-    @level = GameObject.create(:image => "../media/graphics/map1.png", :rotation_center => :top_left)
+    @level = GameObject.create(:image => "./media/graphics/map1.png", :rotation_center => :top_left)
     @player = Player.create
-    @button = Chingu::PressButton.create(:x => 300, :y => 500, :pressed_image => "../media/menu/solo-game-button-pressed.png",
-      :released_image => "../media/menu/solo-game-button-unpressed.png")
+    @button = Chingu::PressButton.create(:x => 300, :y => 500, :pressed_image => "./media/menu/solo-game-button-pressed.png",
+      :released_image => "./media/menu/solo-game-button-unpressed.png")
     #
     # The below code can mostly be replaced with the use of methods "holding?", "holding_all?" or "holding_any?" in Level#update
     # Using holding? in update could be good if you need fine grained controll over when input is dispatched.
@@ -210,7 +210,7 @@ end
     # @player.move_up     if holding_any?(:up, :w)
     # @player.move_down   if holding_any?(:down, :s)
     # @player.fire        if holding?(:space)
-    @image = Image["../media/graphics/map1.png"]
+    @image = Image["./media/graphics/map1.png"]
     $window.caption = "FPS: #{$window.fps} - GameObjects: #{game_objects.size} "
   end
 
