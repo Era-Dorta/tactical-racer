@@ -29,7 +29,7 @@ include Chingu
 
 class Game < Chingu::Window
   def initialize
-    super(800,600, true)
+    super(800,600,true)
     puts "game created"
     #To give a nice old pixeled look
     retrofy
@@ -86,6 +86,8 @@ end
     
     @soloButton.on_click do
       puts "Llendo a solo game"
+      @soloButton.x = 5 
+      @soloButton.y = 5 
     end
     
     @onlineButton.on_click do
@@ -96,11 +98,6 @@ end
       puts "Llendo a multiplayer game"
       switch_game_state(Map1)
     end
-  end
-
-  def update
-    super
-    @image = Image["../media/menu/menu-background.png"]
   end
 
 end  
@@ -120,13 +117,26 @@ end
       $window.close
       exit
     end
-        
-    @player = Player.create
     @tiles = []
-    10.times do |i|
-      @tiles.push PressButton.create(:x => 100, :y => (i*50 + 10), :released_image => "../media/graphics/yellow-tile.png",
-        :pressed_image => "../media/graphics/yellow-tile.png" )
+    9.times do |i|
+      @tiles.push PressButton.create(:x => 100, :y => (i*50 + 80), :released_image => "../media/graphics/vertical.png",
+        :pressed_image => "../media/graphics/vertical.png" )
     end
+    @tiles.push PressButton.create(:x => 100, :y => 530, :released_image => "../media/graphics/turn-bot-left.png",
+      :pressed_image => "../media/graphics/turn-bot-left.png" )    
+    4.times do |i|
+      @tiles.push PressButton.create(:x => (i*50 + 150), :y => 530, :released_image => "../media/graphics/horizontal.png",
+        :pressed_image => "../media/graphics/horizontal.png" )
+    end  
+    #Objects are draw in order, so player must be last one
+    @tiles.each do |i|
+      i.on_click do
+          @player.x = i.x
+          @player.y = i.y
+      end
+    end
+
+    @player = Player.create
     #
     # The input-handler understands gamestates. P is pressed --> push_gamegate(Pause)
     # You can also give it Procs/Lambdas which it will execute when key is pressed.
@@ -159,8 +169,8 @@ end
     # Destroy all created objects of class Bullet
 
     # Place player in a good starting position
-    @player.x = $window.width/2
-    @player.y = $window.height - @player.image.height
+    @player.x = 100
+    @player.y = 80
   end
 
 end
