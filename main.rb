@@ -27,6 +27,25 @@ require '../chingu/lib/chingu.rb'
 include Gosu
 include Chingu
 
+ class EscapeMenu < Chingu::GameState
+  def initialize(options = {})
+    super
+    #On scape key return to where the user was
+    self.input = { :escape => :pop_game_state }
+    @level = GameObject.create(:image => "./media/menu/escape-menu-background.png", :x => 400, :y => 300)
+
+    @exitButton = Chingu::PressButton.create(:x => 400, :y => 300, :released_image => "./media/menu/exit-game-button.png",
+      :pressed_image => "./media/menu/exit-game-button.png")
+          
+    @exitButton.on_click do
+      $window.close
+      exit
+    end    
+    
+  end
+end 
+
+
 class Game < Chingu::Window
   def initialize
     super(800,600,true)
@@ -35,8 +54,20 @@ class Game < Chingu::Window
     retrofy
     #Show cursor
     $window.cursor = true
+    #On scape key pop esc menu
+    self.input = { :escape => :push}
     #First state is menu
     push_game_state(EntryMenu)
+    transitional_game_state(Chingu::GameStates::FadeTo, {:speed => 30})
+  end
+  
+  def push
+    if current_game_state.is_a?(EscapeMenu)
+      push_game_state(@previous_game_state)
+    else 
+      @previous_game_state = current_game_state
+      push_game_state(EscapeMenu)
+    end    
   end
 end
 
@@ -75,6 +106,36 @@ end
       :pressed_image => "./media/menu/online-game-button-pressed.png")
     @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :released_image => "./media/menu/multiplayer-game-button-unpressed.png",
       :pressed_image => "./media/menu/multiplayer-game-button-pressed.png")
+    
+    @soloButton.on_click do
+      puts "Llendo a solo game"
+      @soloButton.set_x = @soloButton.x + 3 
+      @soloButton.set_y = @soloButton.y - 5 
+    end
+    
+    @onlineButton.on_click do
+      puts "Llendo a online game"
+    end    
+    
+    @multiplayerButton.on_click do
+      puts "Llendo a multiplayer game"
+      push_game_state(Map1)
+    end
+  end
+
+end   
+
+ class MapSelect < Chingu::GameState
+  def initialize(options = {})
+    super
+ #   @song = Song["./media/music/cave.ogg"].play(true)
+    @level = GameObject.create(:image => "./media/menu/menu-background.png", :rotation_center => :top_left)
+    @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :released_image => "./media/menu/solo-game-button-unpressed.png",
+      :pressed_image => "./media/menu/solo-game-button-pressed.png")
+    @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "./media/menu/online-game-button-unpressed.png",
+      :pressed_image => "./media/menu/online-game-button-pressed.png")
+    @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :released_image => "./media/menu/multiplayer-game-button-unpressed.png",
+      :pressed_image => "./media/menu/multiplayer-game-button-pressed.png")
 
     @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :released_image => "./media/menu/exit-game-button.png",
       :pressed_image => "./media/menu/exit-game-button.png")
@@ -86,8 +147,8 @@ end
     
     @soloButton.on_click do
       puts "Llendo a solo game"
-      @soloButton.x = 5 
-      @soloButton.y = 5 
+      @soloButton.set_x = @soloButton.x + 3 
+      @soloButton.set_y = @soloButton.y - 5 
     end
     
     @onlineButton.on_click do
@@ -110,13 +171,7 @@ end
     super
     @title = Chingu::Text.create(:text=>"Level #{options[:level].to_s}. P: pause R:restart", :x=>20, :y=>10, :size=>30)
     @level = GameObject.create(:image => "./media/graphics/map1.png", :rotation_center => :top_left)
-    @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :released_image => "./media/menu/exit-game-button.png",
-      :pressed_image => "./media/menu/exit-game-button.png")
-      
-    @exitButton.on_click do
-      $window.close
-      exit
-    end
+
     @tiles = []
     9.times do |i|
       @tiles.push PressButton.create(:x => 100, :y => (i*50 + 80), :released_image => "./media/graphics/vertical.png",
@@ -137,42 +192,11 @@ end
     end
 
     @player = Player.create
-    #
-    # The input-handler understands gamestates. P is pressed --> push_gamegate(Pause)
-    # You can also give it Procs/Lambdas which it will execute when key is pressed.
-    #
-    self.input = {:p => Pause, :r => lambda{ current_game_state.setup } }
-  end
-
-  def update
-    super
-
-    #
-    # Another way of checking input
-    #
-    # @player.move_left   if holding_any?(:left, :a)
-    # @player.move_right  if holding_any?(:right, :d)
-    # @player.move_up     if holding_any?(:up, :w)
-    # @player.move_down   if holding_any?(:down, :s)
-    # @player.fire        if holding?(:space)
-  #  @image = Image["./media/graphics/map1.png"]
-    $window.caption = "FPS: #{$window.fps} - GameObjects: #{game_objects.size} "
-  end
-
-  #
-  # setup() is called each time you switch to the game state (and on creation time).
-  # You can skip setup by switching with push_game_state(:setup => false) or pop_game_state(:setup => false)
-  #
-  # This can be useful if you want to display some kind of box above the gameplay (pause/options/info/... box)
-  #
-  def setup
-    # Destroy all created objects of class Bullet
-
-    # Place player in a good starting position
     @player.x = 100
-    @player.y = 80
-  end
+    @player.y = 80    
 
+    self.input = {:p => Pause}
+  end
 end
 
  class Level < Chingu::GameState
