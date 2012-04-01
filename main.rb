@@ -51,7 +51,7 @@ class Game < Chingu::Window
     super(800,600,true)
     puts "game created"
     #To give a nice old pixeled look
-    retrofy
+  #  retrofy
     #Show cursor
     $window.cursor = true
     #On scape key pop esc menu
@@ -94,6 +94,20 @@ end
   end
 
 end
+=begin
+ class Interface < Chingu::GameObject
+   attr_accessor :dice 
+  def initialize(options = {})
+    super
+    self.x = 400
+    self.y = 550
+    @image = GameObject.create(:image => "./media/menu/interface-background.png", :rotation_center => :top_left)
+    @gasoline = 300
+    @dice = Chingu::PressButton.create(:x => 400, :y => 550, :released_image => "./media/menu/roll-dice-button-unpressed.png",
+      :pressed_image => "./media/menu/roll-dice-button-pressed.png")  
+  end
+end
+=end
 
  class EntryMenu < Chingu::GameState
   def initialize(options = {})
@@ -171,26 +185,63 @@ end
     super
     @title = Chingu::Text.create(:text=>"Level #{options[:level].to_s}. P: pause R:restart", :x=>20, :y=>10, :size=>30)
     @level = GameObject.create(:image => "./media/graphics/map1.png", :rotation_center => :top_left)
-
+    
+    @interface_back = GameObject.create(:image => "./media/menu/interface-background.png", :x => 400, :y => 550)
+    @gasoline = 300
+    @boost = 30
+    @dice_button = Chingu::PressButton.create(:x => 400, :y => 550, :released_image => "./media/menu/roll-dice-button-unpressed.png",
+      :pressed_image => "./media/menu/roll-dice-button-pressed.png")  
+      
+ #   @dice_label = Chingu::Text.create(:text=>"Dice result: ", :x => 50, :y => 510)
+    @boost_label = Chingu::Text.create(:text=>"Boost:", :x => 50, :y => 530)
+    @gasoline_label = Chingu::Text.create(:text=>"Gasoline:", :x => 50, :y => 560)
+    @boost_cards_label = Chingu::Text.create(:text=> "Boost cards" , :x => 610, :y => 510)
+    @dice_label = Chingu::Text.create(:text=> "Dice result:" , :x => 350, :y => 540)
+    hide_game_object @dice_label
+    
+    @gasoline_text = Chingu::Text.create(:text=> @gasoline.to_s , :x => 105, :y => 560)
+    @boost_text = Chingu::Text.create(:text=> @boost.to_s , :x => 90, :y => 530)
+    @dice_text = Chingu::Text.create(:text=> "" , :x => 420, :y => 540)
+    hide_game_object @dice_text
+    
     @tiles = []
-    9.times do |i|
+    5.times do |i|
       @tiles.push PressButton.create(:x => 100, :y => (i*50 + 80), :released_image => "./media/graphics/vertical.png",
         :pressed_image => "./media/graphics/vertical.png" )
     end
+=begin    
     @tiles.push PressButton.create(:x => 100, :y => 530, :released_image => "./media/graphics/turn-bot-left.png",
-      :pressed_image => "./media/graphics/turn-bot-left.png" )    
+      :pressed_image => "./media/graphics/turn-bot-left.png")   
+       
     4.times do |i|
       @tiles.push PressButton.create(:x => (i*50 + 150), :y => 530, :released_image => "./media/graphics/horizontal.png",
         :pressed_image => "./media/graphics/horizontal.png" )
     end  
-    #Objects are draw in order, so player must be last one
+=end    
+
     @tiles.each do |i|
       i.on_click do
-          @player.x = i.x
-          @player.y = i.y
+        @player.x = i.x
+        @player.y = i.y
+        hide_game_object @dice_label
+        hide_game_object @dice_text
+        show_game_object @dice_button 
       end
     end
+    
+    #Set a random seed
+    @rand_generator = Random.new(Time.new.usec)
+    
+    #If player clicks on dice button, roll the dice
+    @dice_button.on_click do
+      @dice_result = @rand_generator.rand(1..6)
+      @dice_text.text = @dice_result.to_s
+      show_game_object @dice_label
+      show_game_object @dice_text
+      hide_game_object @dice_button 
+    end
 
+    #Objects are drawn in order, so player must be last one
     @player = Player.create
     @player.x = 100
     @player.y = 80    
