@@ -116,8 +116,10 @@ end
     @level = GameObject.create(:image => "./media/menu/menu-background.png", :rotation_center => :top_left)
     @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :released_image => "./media/menu/solo-game-button-unpressed.png",
       :pressed_image => "./media/menu/solo-game-button-pressed.png")
-    @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "./media/menu/online-game-button-unpressed.png",
-      :pressed_image => "./media/menu/online-game-button-pressed.png")
+          @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "./media/pill-button.png",
+      :pressed_image => "./media/pill-button-pressed.png", :factor_x => 0.3, :factor_y => 0.3)   
+ #   @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "./media/menu/online-game-button-unpressed.png",
+  #    :pressed_image => "./media/menu/online-game-button-pressed.png")
     @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :released_image => "./media/menu/multiplayer-game-button-unpressed.png",
       :pressed_image => "./media/menu/multiplayer-game-button-pressed.png")
     
@@ -145,7 +147,7 @@ end
  #   @song = Song["./media/music/cave.ogg"].play(true)
     @level = GameObject.create(:image => "./media/menu/menu-background.png", :rotation_center => :top_left)
     @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :released_image => "./media/menu/solo-game-button-unpressed.png",
-      :pressed_image => "./media/menu/solo-game-button-pressed.png")
+      :pressed_image => "./media/menu/solo-game-button-pressed.png")   
     @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "./media/menu/online-game-button-unpressed.png",
       :pressed_image => "./media/menu/online-game-button-pressed.png")
     @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :released_image => "./media/menu/multiplayer-game-button-unpressed.png",
@@ -205,11 +207,31 @@ end
     hide_game_object @dice_text
     
     @tiles = []
+    current_x = 100
+    size_x = 50
+    size_y = 50
+    current_y = 80
+    last_dir = "l"
+    map_file = File.open "./maps/map1.map", "r"
+    #TODO create the map 
+    map_file.each_line do |line|
+      current_dir = line.split(" ")[0]
+      case current_dir
+      when last_dir == current_dir
+        
+        
+      current_x += (line.split(" ")[0]).to_i * size_x
+      current_y += (line.split(" ")[1]).to_i * size_y
+      @tiles.push PressButton.create(:x => current_x, :y => current_y, :released_image => "./media/graphics/vertical.png",
+        :pressed_image => "./media/graphics/vertical.png" )
+    end 
+    map_file.close
+=begin     
     5.times do |i|
       @tiles.push PressButton.create(:x => 100, :y => (i*50 + 80), :released_image => "./media/graphics/vertical.png",
         :pressed_image => "./media/graphics/vertical.png" )
     end
-=begin    
+   
     @tiles.push PressButton.create(:x => 100, :y => 530, :released_image => "./media/graphics/turn-bot-left.png",
       :pressed_image => "./media/graphics/turn-bot-left.png")   
        
@@ -327,7 +349,12 @@ end
     end
   end
 
-=begin
-  $comunicationWithKernel = Comunication.new
-=end
+def readMap options = {}
+  map_file = File.open options[:map_name], "r"
+  
+  map_file.each_line do |line|
+    
+  end
+end
+
   Game.new.show()
