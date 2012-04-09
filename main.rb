@@ -218,7 +218,7 @@ end
       current_dir = line.split(" ")[0]
       case current_dir
       when last_dir == current_dir
-        
+      end  
         
       current_x += (line.split(" ")[0]).to_i * size_x
       current_y += (line.split(" ")[1]).to_i * size_y
