@@ -34,8 +34,7 @@ include Chingu
     self.input = { :escape => :pop_game_state }
     @level = GameObject.create(:image => "./media/menu/escape-menu-background.png", :x => 400, :y => 300)
 
-    @exitButton = Chingu::PressButton.create(:x => 400, :y => 300, :released_image => "./media/menu/exit-game-button.png",
-      :pressed_image => "./media/menu/exit-game-button.png")
+    @exitButton = Chingu::PressButton.create(:x => 400, :y => 300, :button_image => "./media/menu/exit-game-button.png")
           
     @exitButton.on_click do
       $window.close
@@ -48,7 +47,7 @@ end
 
 class Game < Chingu::Window
   def initialize
-    super(800,600,true)
+    super(800,600,false)
     puts "game created"
     #To give a nice old pixeled look
   #  retrofy
@@ -103,7 +102,7 @@ end
     self.y = 550
     @image = GameObject.create(:image => "./media/menu/interface-background.png", :rotation_center => :top_left)
     @gasoline = 300
-    @dice = Chingu::PressButton.create(:x => 400, :y => 550, :released_image => "./media/menu/roll-dice-button-unpressed.png",
+    @dice = Chingu::PressButton.create(:x => 400, :y => 550, :button_image => "./media/menu/roll-dice-button-unpressed.png",
       :pressed_image => "./media/menu/roll-dice-button-pressed.png")  
   end
 end
@@ -114,14 +113,12 @@ end
     super
  #   @song = Song["./media/music/cave.ogg"].play(true)
     @level = GameObject.create(:image => "./media/menu/menu-background.png", :rotation_center => :top_left)
-    @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :released_image => "./media/menu/solo-game-button-unpressed.png",
-      :pressed_image => "./media/menu/solo-game-button-pressed.png")
-          @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "./media/pill-button.png",
-      :pressed_image => "./media/pill-button-pressed.png", :factor_x => 0.3, :factor_y => 0.3)   
- #   @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "./media/menu/online-game-button-unpressed.png",
+    @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :button_image => "./media/menu/solo-game-button-unpressed.png")
+    @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :button_image => "./media/pill-button.png",
+       :factor_x => 0.3, :factor_y => 0.3)   
+ #   @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :button_image => "./media/menu/online-game-button-unpressed.png",
   #    :pressed_image => "./media/menu/online-game-button-pressed.png")
-    @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :released_image => "./media/menu/multiplayer-game-button-unpressed.png",
-      :pressed_image => "./media/menu/multiplayer-game-button-pressed.png")
+    @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :button_image => "./media/menu/multiplayer-game-button-unpressed.png")
     
     @soloButton.on_click do
       puts "Llendo a solo game"
@@ -146,15 +143,11 @@ end
     super
  #   @song = Song["./media/music/cave.ogg"].play(true)
     @level = GameObject.create(:image => "./media/menu/menu-background.png", :rotation_center => :top_left)
-    @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :released_image => "./media/menu/solo-game-button-unpressed.png",
-      :pressed_image => "./media/menu/solo-game-button-pressed.png")   
-    @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :released_image => "./media/menu/online-game-button-unpressed.png",
-      :pressed_image => "./media/menu/online-game-button-pressed.png")
-    @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :released_image => "./media/menu/multiplayer-game-button-unpressed.png",
-      :pressed_image => "./media/menu/multiplayer-game-button-pressed.png")
+    @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, :button_image => "./media/menu/solo-game-button-unpressed.png")   
+    @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, :button_image => "./media/menu/online-game-button-unpressed.png")
+    @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, :button_image => "./media/menu/multiplayer-game-button-unpressed.png")
 
-    @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :released_image => "./media/menu/exit-game-button.png",
-      :pressed_image => "./media/menu/exit-game-button.png")
+    @exitButton = Chingu::PressButton.create(:x => 750, :y => 30, :button_image => "./media/menu/exit-game-button.png")
       
     @exitButton.on_click do
       $window.close
@@ -191,8 +184,7 @@ end
     @interface_back = GameObject.create(:image => "./media/menu/interface-background.png", :x => 400, :y => 550)
     @gasoline = 300
     @boost = 30
-    @dice_button = Chingu::PressButton.create(:x => 400, :y => 550, :released_image => "./media/menu/roll-dice-button-unpressed.png",
-      :pressed_image => "./media/menu/roll-dice-button-pressed.png")  
+    @dice_button = Chingu::PressButton.create(:x => 400, :y => 550, :button_image => "./media/menu/roll-dice-button-unpressed.png")  
       
  #   @dice_label = Chingu::Text.create(:text=>"Dice result: ", :x => 50, :y => 510)
     @boost_label = Chingu::Text.create(:text=>"Boost:", :x => 50, :y => 530)
@@ -208,65 +200,98 @@ end
     
     @tiles = []
     current_x = 100
-    size_x = 50
-    size_y = 50
-    current_y = 80
-    last_dir = "l"
+    current_y = 30    
+  #  size_x = 50
+  #  size_y = 50
+  #  last_dir = "l"
     map_file = File.open "./maps/map1.map", "r"
     #TODO create the map 
     map_file.each_line do |line|
-      current_dir = line.split(" ")[0]
-      case current_dir
-      when last_dir == current_dir
-      end  
-        
-      current_x += (line.split(" ")[0]).to_i * size_x
-      current_y += (line.split(" ")[1]).to_i * size_y
-      @tiles.push PressButton.create(:x => current_x, :y => current_y, :released_image => "./media/graphics/vertical.png",
-        :pressed_image => "./media/graphics/vertical.png" )
+   #   current_dir = line.split(" ")[0]
+   #   case current_dir
+   #   when last_dir == current_dir
+   #   end  
+      line.chomp!
+      case line.split(" ")[0] 
+        when "vertical"
+          current_x = line.split(" ")[1]  
+          current_y = line.split(" ")[2]   
+          tile_image = "./media/graphics/vertical.png" 
+        when "horizontal"
+          current_x = line.split(" ")[1]  
+          current_y = line.split(" ")[2]         
+          tile_image = "./media/graphics/horizontal.png"  
+        when "down-right"
+          current_x = line.split(" ")[1]  
+          current_y = line.split(" ")[2]  
+          tile_image = "./media/graphics/turn-down-right.png"
+        when "left-down"
+          current_x = line.split(" ")[1]  
+          current_y = line.split(" ")[2]  
+          tile_image = "./media/graphics/turn-left-down.png"     
+        when "left-top"
+          current_x = line.split(" ")[1]  
+          current_y = line.split(" ")[2]  
+          tile_image = "./media/graphics/turn-left-top.png"  
+        when "top-right"
+          current_x = line.split(" ")[1]  
+          current_y = line.split(" ")[2]  
+          tile_image = "./media/graphics/turn-top-right.png"  
+        #when ""      
+   #   current_x += (line.split(" ")[0]).to_i * size_x
+   #   current_y += (line.split(" ")[1]).to_i * size_y
+        else
+          puts "Corrupted file map, unexpected #{line.split(" ")[0]}\n"
+          return
+      end
+        @tiles.push PressButton.create(:x => current_x.to_i, :y => current_y.to_i, 
+          :button_image => tile_image) 
+        @tiles.last.active = false  
     end 
-    map_file.close
-=begin     
-    5.times do |i|
-      @tiles.push PressButton.create(:x => 100, :y => (i*50 + 80), :released_image => "./media/graphics/vertical.png",
-        :pressed_image => "./media/graphics/vertical.png" )
-    end
-   
-    @tiles.push PressButton.create(:x => 100, :y => 530, :released_image => "./media/graphics/turn-bot-left.png",
-      :pressed_image => "./media/graphics/turn-bot-left.png")   
-       
-    4.times do |i|
-      @tiles.push PressButton.create(:x => (i*50 + 150), :y => 530, :released_image => "./media/graphics/horizontal.png",
-        :pressed_image => "./media/graphics/horizontal.png" )
-    end  
-=end    
+    map_file.close  
 
     @tiles.each do |i|
       i.on_click do
+        #Deactivate the tiles
+        @dice_result.times do |i|
+          @tiles[(@player_index_tile + i + 1) % @tiles.length].active = false
+        end        
+        #Set new player position and find where he is
         @player.x = i.x
         @player.y = i.y
+        while @player.x != @tiles[@player_index_tile].x or
+           @player.y != @tiles[@player_index_tile].y do
+           @player_index_tile = (@player_index_tile + 1) % @tiles.length
+        end    
         hide_game_object @dice_label
         hide_game_object @dice_text
         show_game_object @dice_button 
+        @dice_button.active = true
       end
     end
     
     #Set a random seed
     @rand_generator = Random.new(Time.new.usec)
     
+    @player_index_tile = 0
     #If player clicks on dice button, roll the dice
     @dice_button.on_click do
       @dice_result = @rand_generator.rand(1..6)
+      #Activate the posible tiles
+      @dice_result.times do |i|
+        @tiles[(@player_index_tile + i + 1) % @tiles.length].active = true
+      end
       @dice_text.text = @dice_result.to_s
       show_game_object @dice_label
       show_game_object @dice_text
       hide_game_object @dice_button 
+      @dice_button.active = false
     end
 
     #Objects are drawn in order, so player must be last one
     @player = Player.create
-    @player.x = 100
-    @player.y = 80    
+    @player.x = @tiles[0].x
+    @player.y = @tiles[0].y   
 
     self.input = {:p => Pause}
   end
@@ -282,8 +307,7 @@ end
     @title = Chingu::Text.create(:text=>"Level #{options[:level].to_s}. P: pause R:restart", :x=>20, :y=>10, :size=>30)
     @level = GameObject.create(:image => "./media/graphics/map1.png", :rotation_center => :top_left)
     @player = Player.create
-    @button = Chingu::PressButton.create(:x => 300, :y => 500, :pressed_image => "./media/menu/solo-game-button-pressed.png",
-      :released_image => "./media/menu/solo-game-button-unpressed.png")
+    @button = Chingu::PressButton.create(:x => 300, :y => 500, :button_image => "./media/menu/solo-game-button-unpressed.png")
     #
     # The below code can mostly be replaced with the use of methods "holding?", "holding_all?" or "holding_any?" in Level#update
     # Using holding? in update could be good if you need fine grained controll over when input is dispatched.
