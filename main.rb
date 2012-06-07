@@ -71,9 +71,13 @@ class Game < Chingu::Window
 end
 
  class Player < Chingu::GameObject
+   attr_accessor :current_tile
   def initialize(options = {})
     super
     @image = Image["./media/graphics/car1.png"]
+    @current_tile = 0
+    self.factor_x = 0.3
+    self.factor_y = 0.3
   end
 
   def move_left;  @x -= 6; end
@@ -201,8 +205,8 @@ end
     @tiles = []
     current_x = 100
     current_y = 30    
-  #  size_x = 50
-  #  size_y = 50
+    size_x = 50
+    size_y = 50
   #  last_dir = "l"
     map_file = File.open "./maps/map1.map", "r"
     #TODO create the map 
@@ -213,30 +217,42 @@ end
    #   end  
       line.chomp!
       case line.split(" ")[0] 
-        when "vertical"
-          current_x = line.split(" ")[1]  
-          current_y = line.split(" ")[2]   
+        when "up"
+          current_y = current_y - size_y
           tile_image = "./media/graphics/vertical.png" 
-        when "horizontal"
-          current_x = line.split(" ")[1]  
-          current_y = line.split(" ")[2]         
+        when "down" 
+          current_y = current_y + size_y  
+          tile_image = "./media/graphics/vertical.png"           
+        when "left"
+          current_x = current_x - size_x         
           tile_image = "./media/graphics/horizontal.png"  
-        when "down-right"
-          current_x = line.split(" ")[1]  
-          current_y = line.split(" ")[2]  
+        when "right"
+          current_x = current_x + size_x         
+          tile_image = "./media/graphics/horizontal.png"           
+        when "right-down"
+          current_x = current_x - size_x               
           tile_image = "./media/graphics/turn-down-right.png"
+        when "down-right"
+          current_y = current_y - size_y    
+          tile_image = "./media/graphics/turn-down-right.png"          
         when "left-down"
-          current_x = line.split(" ")[1]  
-          current_y = line.split(" ")[2]  
-          tile_image = "./media/graphics/turn-left-down.png"     
-        when "left-top"
-          current_x = line.split(" ")[1]  
-          current_y = line.split(" ")[2]  
+          current_x = current_x + size_x 
+          tile_image = "./media/graphics/turn-left-down.png"    
+        when "down-left"
+          current_y = current_y - size_y  
+          tile_image = "./media/graphics/turn-left-down.png"            
+        when "left-up"
+          current_x = current_x + size_x  
           tile_image = "./media/graphics/turn-left-top.png"  
-        when "top-right"
-          current_x = line.split(" ")[1]  
-          current_y = line.split(" ")[2]  
-          tile_image = "./media/graphics/turn-top-right.png"  
+        when "up-left"
+          current_y = current_y + size_y  
+          tile_image = "./media/graphics/turn-left-top.png" 
+        when "right-up"
+          current_x = current_x - size_x  
+          tile_image = "./media/graphics/turn-top-right.png"                      
+        when "up-right"
+          current_y = current_y + size_y 
+          tile_image = "./media/graphics/turn-top-right.png"           
         #when ""      
    #   current_x += (line.split(" ")[0]).to_i * size_x
    #   current_y += (line.split(" ")[1]).to_i * size_y
@@ -250,19 +266,17 @@ end
     end 
     map_file.close  
 
-    @tiles.each do |i|
-      i.on_click do
+    @tiles.each_index do |i|
+      @tiles[i].on_click do
         #Deactivate the tiles
-        @dice_result.times do |i|
-          @tiles[(@player_index_tile + i + 1) % @tiles.length].active = false
+        @dice_result.times do |j|
+          @tiles[(@player.current_tile + j + 1) % @tiles.length].active = false
         end        
+        puts "\n"
         #Set new player position and find where he is
-        @player.x = i.x
-        @player.y = i.y
-        while @player.x != @tiles[@player_index_tile].x or
-           @player.y != @tiles[@player_index_tile].y do
-           @player_index_tile = (@player_index_tile + 1) % @tiles.length
-        end    
+        @player.x = @tiles[i].x
+        @player.y = @tiles[i].y
+        @player.current_tile = i 
         hide_game_object @dice_label
         hide_game_object @dice_text
         show_game_object @dice_button 
@@ -278,9 +292,9 @@ end
     @dice_button.on_click do
       @dice_result = @rand_generator.rand(1..6)
       #Activate the posible tiles
-      @dice_result.times do |i|
-        @tiles[(@player_index_tile + i + 1) % @tiles.length].active = true
-      end
+      @dice_result.times do |j|
+        @tiles[(@player.current_tile + j + 1) % @tiles.length].active = true
+      end  
       @dice_text.text = @dice_result.to_s
       show_game_object @dice_label
       show_game_object @dice_text
