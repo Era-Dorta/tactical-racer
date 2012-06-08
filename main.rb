@@ -32,7 +32,7 @@ class Escape_Menu < Chingu::GameState
     @exitButton = Chingu::PressButton.create(:x => 400, :y => 300,
     :button_image => "./media/menu/exit-game-button.png")
 
-    @exitButton.on_click do
+    @exitButton.on_release do
       $window.close
       exit
     end
@@ -93,32 +93,90 @@ class Map_Select < Chingu::GameState
     super
     @background = GameObject.create(:image => "./media/menu/menu-background.png", 
     :rotation_center => :top_left)
-    @maps = []
-    @maps_button = []
+    j = 0
     #Read al file names in map 
     Dir.entries("./maps/").each do |file| 
       if file.include? ".map"
-        @maps.push file
-      end  
-      
+        Text.create(file.gsub(".map",""), :x => 300, :y => 50 + j )
+        button = Chingu::PressButton.create(:x => 400, :y => 55 + j, 
+        :button_image => "./media/menu/play-map-button.png") 
+        
+        button.on_release do
+          push_game_state(Play_Map.new(:map => file))
+        end
+        j += 60
+      end     
     end
-    @text = Chingu::PressButtonText.create("blablabla", :x => 300, :y => 500 )
-   # @text.on_click do
-      puts "yea\n"
-      puts @text.width
-   # end
-    
-        @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, 
-    :button_image => "./media/menu/multiplayer-game-button-unpressed.png")
-      @multiplayerButton.on_click do
-      puts "yea2\n"
-      puts @multiplayerButton.width
-    end  
-    
-    
   end
 end  
 
-
+class Play_Map < Chingu::GameState
+  
+  def create_map map
+    @map = []
+    current_x = 100
+    current_y = 30    
+    size_x = 50
+    size_y = 50
+    map_file = File.open "./maps/" + map, "r"
+    map_file.each_line do |line|
+      line.chomp!
+      case line.split(" ")[0] 
+        when "up"
+          current_y = current_y - size_y
+          square_image = "./media/graphics/vertical.png" 
+        when "down" 
+          current_y = current_y + size_y  
+          square_image = "./media/graphics/vertical.png"           
+        when "left"
+          current_x = current_x - size_x         
+          square_image = "./media/graphics/horizontal.png"  
+        when "right"
+          current_x = current_x + size_x         
+          square_image = "./media/graphics/horizontal.png"           
+        when "right-down"
+          current_x = current_x - size_x               
+          square_image = "./media/graphics/turn-down-right.png"
+        when "down-right"
+          current_y = current_y - size_y    
+          square_image = "./media/graphics/turn-down-right.png"          
+        when "left-down"
+          current_x = current_x + size_x 
+          square_image = "./media/graphics/turn-left-down.png"    
+        when "down-left"
+          current_y = current_y - size_y  
+          square_image = "./media/graphics/turn-left-down.png"            
+        when "left-up"
+          current_x = current_x + size_x  
+          square_image = "./media/graphics/turn-left-top.png"  
+        when "up-left"
+          current_y = current_y + size_y  
+          square_image = "./media/graphics/turn-left-top.png" 
+        when "right-up"
+          current_x = current_x - size_x  
+          square_image = "./media/graphics/turn-top-right.png"                      
+        when "up-right"
+          current_y = current_y + size_y 
+          square_image = "./media/graphics/turn-top-right.png"           
+        else
+          puts "Corrupted file map, unexpected #{line.split(" ")[0]}\n"
+          return
+      end
+        square = Square.new
+        square.button = PressButton.create(:x => current_x.to_i, :y => current_y.to_i, 
+          :button_image => square_image) 
+        square.button.active = false   
+        @map.push square 
+    end 
+    map_file.close      
+  end
+  
+  def initialize(options = {})
+    super
+    @background = GameObject.create(:image => "./media/menu/menu-background.png", 
+    :rotation_center => :top_left)
+    create_map options[:map]
+  end
+end  
 
 Game.new.show()

@@ -57,7 +57,7 @@ class Boost_Card
 end
 
 class Square
-  attr_accessor :n_lanes
+  attr_accessor :n_lanes, :button
   def initialize
     @button 
     @n_lanes = 3
