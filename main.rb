@@ -102,6 +102,19 @@ class Map_Select < Chingu::GameState
       end  
       
     end
+    @text = Chingu::PressButtonText.create("blablabla", :x => 300, :y => 500 )
+   # @text.on_click do
+      puts "yea\n"
+      puts @text.width
+   # end
+    
+        @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, 
+    :button_image => "./media/menu/multiplayer-game-button-unpressed.png")
+      @multiplayerButton.on_click do
+      puts "yea2\n"
+      puts @multiplayerButton.width
+    end  
+    
     
   end
 end  
