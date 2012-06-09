@@ -96,7 +96,7 @@ class Map_Select < Chingu::GameState
     j = 0
     #Read al file names in map 
     Dir.entries("./maps/").each do |file| 
-      if file.include? ".map"
+      if file.include? ".map" and not file.include? "~"
         Text.create(file.gsub(".map",""), :x => 300, :y => 50 + j )
         button = Chingu::PressButton.create(:x => 400, :y => 55 + j, 
         :button_image => "./media/menu/play-map-button.png") 
@@ -118,50 +118,52 @@ class Play_Map < Chingu::GameState
     current_y = 30    
     size_x = 50
     size_y = 50
+    file_type = ".png"
     map_file = File.open "./maps/" + map, "r"
     map_file.each_line do |line|
       line.chomp!
       case line.split(" ")[0] 
         when "up"
           current_y = current_y - size_y
-          square_image = "./media/graphics/vertical.png" 
+          square_image = "./media/graphics/vertical" 
         when "down" 
           current_y = current_y + size_y  
-          square_image = "./media/graphics/vertical.png"           
+          square_image = "./media/graphics/vertical"           
         when "left"
           current_x = current_x - size_x         
-          square_image = "./media/graphics/horizontal.png"  
+          square_image = "./media/graphics/horizontal"  
         when "right"
           current_x = current_x + size_x         
-          square_image = "./media/graphics/horizontal.png"           
+          square_image = "./media/graphics/horizontal"           
         when "right-down"
           current_x = current_x - size_x               
-          square_image = "./media/graphics/turn-down-right.png"
+          square_image = "./media/graphics/turn-down-right"
         when "down-right"
           current_y = current_y - size_y    
-          square_image = "./media/graphics/turn-down-right.png"          
+          square_image = "./media/graphics/turn-down-right"          
         when "left-down"
           current_x = current_x + size_x 
-          square_image = "./media/graphics/turn-left-down.png"    
+          square_image = "./media/graphics/turn-left-down"    
         when "down-left"
           current_y = current_y - size_y  
-          square_image = "./media/graphics/turn-left-down.png"            
+          square_image = "./media/graphics/turn-left-down"            
         when "left-up"
           current_x = current_x + size_x  
-          square_image = "./media/graphics/turn-left-top.png"  
+          square_image = "./media/graphics/turn-left-top"  
         when "up-left"
           current_y = current_y + size_y  
-          square_image = "./media/graphics/turn-left-top.png" 
+          square_image = "./media/graphics/turn-left-top" 
         when "right-up"
           current_x = current_x - size_x  
-          square_image = "./media/graphics/turn-top-right.png"                      
+          square_image = "./media/graphics/turn-top-right"                      
         when "up-right"
           current_y = current_y + size_y 
-          square_image = "./media/graphics/turn-top-right.png"           
+          square_image = "./media/graphics/turn-top-right"           
         else
           puts "Corrupted file map, unexpected #{line.split(" ")[0]}\n"
           return
       end
+        square_image += line.split(" ")[1] + line.split(" ")[2] + file_type
         square = Square.new
         square.button = PressButton.create(:x => current_x.to_i, :y => current_y.to_i, 
           :button_image => square_image) 
@@ -169,6 +171,12 @@ class Play_Map < Chingu::GameState
         @map.push square 
     end 
     map_file.close      
+  end
+  
+  def place_players n_players
+    n_players.times do |i|
+      
+    end
   end
   
   def initialize(options = {})

@@ -64,7 +64,43 @@ class Square
     @used_lanes = 0
     @gas_cost = 1
     @player_may_move = false
+    @type
+    @size_x = 15
+    @size_y = 15
+    @lane_offset = 5
   end
+  
+  def player_coord
+    if @used_lanes == @n_lanes
+      return nil
+    end
+    #Player position on the square depends on the 
+    #type of square, how many cars are in the square
+    #and how many cars can be on the square
+    case @type
+    when "vertical"
+      x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
+      y = @button.y
+    when "horizontal"
+      x = @button.y
+      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset          
+    when "right-down"
+      x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
+      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset   
+         
+    when "left-down"
+      x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
+      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset       
+    when "left-up"
+      x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
+      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset      
+    when "right-up"
+      x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
+      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset      
+    end
+    return {:x => x, :y => y} 
+  end
+  
 end
 
 class Boxes_Square < Square

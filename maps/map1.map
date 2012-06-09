@@ -1,10 +1,10 @@
-right-down
-down
-down
-up-right
-right
-right
-left-down
+right-down 2 3
+down 1 2
+down 2 2
+up-right 1 1
+right 2 2
+right 3 1
+left-down 2 1
 down 3 1
 down 2 2
 up-left 2 1
