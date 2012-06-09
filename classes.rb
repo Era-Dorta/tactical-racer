@@ -57,17 +57,18 @@ class Boost_Card
 end
 
 class Square
-  attr_accessor :n_lanes, :button
+  attr_accessor :n_lanes, :button, :type
   def initialize
-    @button 
+    @button = nil
     @n_lanes = 3
     @used_lanes = 0
     @gas_cost = 1
     @player_may_move = false
-    @type
-    @size_x = 15
-    @size_y = 15
+    @type = nil
+    @size_x = 12
+    @size_y = 12
     @lane_offset = 5
+    @extra_offset = 15
   end
   
   def player_coord
@@ -80,25 +81,40 @@ class Square
     case @type
     when "vertical"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y
+      y = @button.y - @extra_offset
     when "horizontal"
       x = @button.y
-      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset          
+      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset - @extra_offset          
     when "right-down"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset   
-         
+      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset - @extra_offset         
     when "left-down"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset       
+      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset - @extra_offset       
     when "left-up"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset      
+      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset - @extra_offset      
     when "right-up"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset      
+      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offse - @extra_offset      
     end
     return {:x => x, :y => y} 
+  end
+  
+  def player_in
+    if @used_lanes < @n_lanes
+      @used_lanes += 1
+    else
+      raise "Square: #{@button.x} #{@button.y} is full but a player wanted to go in\n" 
+    end   
+  end
+  
+  def player_out
+    if @used_lanes > 0
+      @used_lanes -= 1
+    else
+      raise "Square: #{@button.x} #{@button.y} is emppty but a player wanted to go out\n" 
+    end  
   end
   
 end
@@ -115,30 +131,27 @@ class Boxes_Square < Square
 end
 
 class Player < Chingu::GameObject
-   attr_accessor :tyre_change, :map
+   attr_accessor :tyre_change, :map, :current_square
+   attr_reader :current_gas, :main_boost
   def initialize(options = {})
     super
-    @last_Dice_Roll
-    @current_Square = 0
-    @current_Gas = 300
+   
+    @last_dice_roll = nil
+    @current_square = 0
+    @current_gas = 300
     @tyre_change = false
-    @main_Boost = 20
-    @dice_Record = Array.new(6,0)
-    @current_Lap = 0
-    @name = "no_name"
-    @starting_Square = 0
-    @boxes = 0
+    @main_boost = 20
+    @dice_record = Array.new(6,0)
+    @current_lap = 0
+    @name = options[:name]
+    @boxes = options[:boxes]
     @crashed = false
     @boost_cards = []
-    @map 
-    
-    @image = Image["./media/graphics/car1.png"]
+    @map = nil
+ 
+    @image = Image[options[:car_image]]
     self.factor_x = 0.3
     self.factor_y = 0.3
-  end
-
-  def set_image image
-    @image = Image[image]
   end
   
   def move movement, boost_cards
@@ -146,21 +159,22 @@ class Player < Chingu::GameObject
   end
   
   def roll_dice
-    @last_Dice_Roll = RG.get_rand(1..6)
-    @dice_Record[@last_Dice_Roll] += 1
+    @last_dice_roll = RG.get_rand(1..6)
+    @dice_record[@last_dice_roll] += 1
     
     #If player got six times one move him back
-    if @dice_Record[1] == 6
+    if @dice_record[1] == 6
       goes_back = RG.get_rand(1..6)
       #TODO Move player back
-      @dice_Record[1] = 0
+      @dice_record[1] = 0
     end
     
     #If player got six times six give a card award
-    if @dice_Record[6] == 6
+    if @dice_record[6] == 6
       @boost_cards.push RG.get_rand(1..6)
-      @dice_Record[6] = 0
+      @dice_record[6] = 0
       #TODO Update view
     end      
   end
 end
+

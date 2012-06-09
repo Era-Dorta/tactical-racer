@@ -23,7 +23,7 @@ require './classes.rb'
 
 class Escape_Menu < Chingu::GameState
   def initialize(options = {})
-    super
+    super   
     #On scape key return to where the user was
     self.input = { :escape => :pop_game_state }
     @level = GameObject.create(:image => "./media/menu/escape-menu-background.png",
@@ -88,11 +88,47 @@ class Entry_Menu < Chingu::GameState
   end
 end  
 
+class N_Players < Chingu::GameState
+  def initialize(options = {})
+    super
+    @background = GameObject.create(:image => "./media/menu/menu-background.png", 
+    :rotation_center => :top_left)
+    @back_button = Chingu::PressButton.create(:x => 100, :y => 500, 
+    :button_image => "./media/menu/back-button.png")
+    
+    @back_button.on_release do
+      push_game_state(Entry_Menu)
+    end
+    
+    Text.create("Choose number of players", :x => 300, :y => 50 )
+    @n_players_buttons = []
+    j = 0
+    6.times do |i|
+      @n_players_buttons.push Chingu::PressButton.create(:x => 100, :y => 100 + j, 
+      :button_image => "./media/menu/" +(i + 1).to_s + "-button.png")
+    end
+    
+    @n_players_buttons.each_index do |i|
+      @n_players_buttons[i].on_release do
+        #TODO pass information about players and select name
+        push_game_state(Map_Select(:n_players => i + 1))
+      end
+    end    
+  end
+end  
+
 class Map_Select < Chingu::GameState
   def initialize(options = {})
     super
     @background = GameObject.create(:image => "./media/menu/menu-background.png", 
     :rotation_center => :top_left)
+    @back_button = Chingu::PressButton.create(:x => 100, :y => 500, 
+    :button_image => "./media/menu/back-button.png")
+    Text.create("Select a map", :x => 300, :y => 10)
+    
+    @back_button.on_release do
+      push_game_state(Entry_Menu)
+    end
     j = 0
     #Read al file names in map 
     Dir.entries("./maps/").each do |file| 
@@ -124,39 +160,51 @@ class Play_Map < Chingu::GameState
       line.chomp!
       case line.split(" ")[0] 
         when "up"
+          type = "vertical"
           current_y = current_y - size_y
           square_image = "./media/graphics/vertical" 
         when "down" 
+          type = "vertical"
           current_y = current_y + size_y  
           square_image = "./media/graphics/vertical"           
         when "left"
+          type = "horizontal"
           current_x = current_x - size_x         
           square_image = "./media/graphics/horizontal"  
         when "right"
+          type = "horizontal"
           current_x = current_x + size_x         
           square_image = "./media/graphics/horizontal"           
         when "right-down"
+          type = "right-down"
           current_x = current_x - size_x               
           square_image = "./media/graphics/turn-down-right"
         when "down-right"
+          type = "right-down"
           current_y = current_y - size_y    
           square_image = "./media/graphics/turn-down-right"          
         when "left-down"
+          type = "left-down"
           current_x = current_x + size_x 
           square_image = "./media/graphics/turn-left-down"    
         when "down-left"
+          type = "left-down"
           current_y = current_y - size_y  
           square_image = "./media/graphics/turn-left-down"            
         when "left-up"
+          type = "left-up"
           current_x = current_x + size_x  
           square_image = "./media/graphics/turn-left-top"  
         when "up-left"
+          type = "left-up"
           current_y = current_y + size_y  
           square_image = "./media/graphics/turn-left-top" 
         when "right-up"
+          type = "right-up"
           current_x = current_x - size_x  
           square_image = "./media/graphics/turn-top-right"                      
         when "up-right"
+          type = "right-up"
           current_y = current_y + size_y 
           square_image = "./media/graphics/turn-top-right"           
         else
@@ -167,23 +215,82 @@ class Play_Map < Chingu::GameState
         square = Square.new
         square.button = PressButton.create(:x => current_x.to_i, :y => current_y.to_i, 
           :button_image => square_image) 
-        square.button.active = false   
+        square.button.active = false  
+        square.type = type 
         @map.push square 
     end 
     map_file.close      
   end
   
-  def place_players n_players
-    n_players.times do |i|
-      
+  def place_players players
+    #Set turns randomly
+    @player_turn = []
+    c_players = Array.new(players)
+    n_players = c_players.length
+    n_players.times do 
+      #Pick a player randomly
+      player = c_players.sample
+      c_players.delete player
+      #Insert it in turn queue
+      @player_turn.push [player]     
     end
+    
+    #Place players on the map
+    i = 0
+    current_square = @map[i]
+    @player_turn.each do |turn|
+      turn.each do |player|
+        #Ask current square for a player position on it
+        player_pos = current_square.player_coord
+        #If there is not position, go to next square
+        if player_pos == nil
+          i += 1
+          current_square = @map[i]
+          player_pos = current_square.player_coord
+        end
+        #Place player on its square
+        player.x = player_pos[:x]
+        player.y = player_pos[:y]
+        player.current_square = i
+        @map[i].player_in
+      end
+    end    
   end
   
   def initialize(options = {})
     super
     @background = GameObject.create(:image => "./media/menu/menu-background.png", 
     :rotation_center => :top_left)
+    @back_button = Chingu::PressButton.create(:x => 100, :y => 500, 
+    :button_image => "./media/menu/back-button.png")
+    
+    @back_button.on_release do
+      push_game_state(Map_Select)
+    end    
+    
     create_map options[:map]
+    @players = []
+    @players.push Player.create(:name => "Pepe", :car_image => "./media/graphics/car1.png")
+    @players.push Player.create(:name => "Juan", :car_image => "./media/graphics/car2.png")
+    @players.push Player.create(:name => "Andres", :car_image => "./media/graphics/car3.png")
+    place_players @players
+    
+    current_player = @player_turn[0][0]
+    #Create the player interface
+    @interface_back = GameObject.create(:image => "./media/menu/interface-background.png", 
+    :x => 400, :y => 550)
+    @dice_button = Chingu::PressButton.create(:x => 400, :y => 550, 
+    :button_image => "./media/menu/roll-dice-button-unpressed.png")
+    @boost_label = Chingu::Text.create(:text=>"Boost:", :x => 50, :y => 530)
+    @gasoline_label = Chingu::Text.create(:text=>"Gasoline:", :x => 50, :y => 560)
+    @boost_cards_label = Chingu::Text.create(:text=> "Boost cards" , :x => 610, :y => 510)
+    @dice_label = Chingu::Text.create(:text=> "Dice result:" , :x => 350, :y => 540)
+    hide_game_object @dice_label
+    
+    @gasoline_text = Chingu::Text.create(:text=> current_player.current_gas.to_s , :x => 105, :y => 560)
+    @boost_text = Chingu::Text.create(:text=> current_player.main_boost.to_s , :x => 90, :y => 530)
+    @dice_text = Chingu::Text.create(:text=> "" , :x => 420, :y => 540)
+    hide_game_object @dice_text    
   end
 end  
 
