@@ -23,7 +23,6 @@
 require 'rubygems' rescue nil
 $LOAD_PATH.unshift File.join(File.expand_path(__FILE__), "..", "..", "lib")
 require '../chingu/lib/chingu.rb'
-require 'singleton'
 #require 'chingu'
 include Gosu
 include Chingu

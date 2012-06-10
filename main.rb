@@ -83,12 +83,15 @@ class Entry_Menu < Chingu::GameState
     end    
     
     @multiplayerButton.on_release do
-      push_game_state(Map_Select)
+      #@players = []
+      #@players.push "juan"     
+      #push_game_state(Map_Select.new(:players_name => @players))
+      push_game_state(Number_Players)
     end
   end
 end  
 
-class N_Players < Chingu::GameState
+class Number_Players < Chingu::GameState
   def initialize(options = {})
     super
     @background = GameObject.create(:image => "./media/menu/menu-background.png", 
@@ -104,16 +107,101 @@ class N_Players < Chingu::GameState
     @n_players_buttons = []
     j = 0
     6.times do |i|
-      @n_players_buttons.push Chingu::PressButton.create(:x => 100, :y => 100 + j, 
+      @n_players_buttons.push Chingu::PressButton.create(:x => 370, :y => 100 + j, 
       :button_image => "./media/menu/" +(i + 1).to_s + "-button.png")
+      j += 50
     end
     
+    @names_entered = 0
+    @players_name = [] 
     @n_players_buttons.each_index do |i|
       @n_players_buttons[i].on_release do
-        #TODO pass information about players and select name
-        push_game_state(Map_Select(:n_players => i + 1))
+        push_game_state(Name_Select.new(
+        :c_players => @names_entered + 1, :callback => method(:got_name)))
+        @n_players = i + 1
       end
+    end   
+  end
+  
+  def got_name name
+    @names_entered += 1 
+    @players_name.push name
+    if @names_entered == @n_players
+      push_game_state(Car_Selection.new(:players_name => @players_name))  
+      #push_game_state(Map_Select.new(:players_name => @players_name))  
+    else
+    push_game_state(Name_Select.new(
+    :c_players => @names_entered + 1, :callback => method(:got_name)))
+    end
+  end 
+end  
+
+class Name_Select < GameStates::EnterName
+  def initialize(options = {})
+    super
+    @background = GameObject.create(:image => "./media/menu/menu-background.png", 
+    :rotation_center => :top_left, :zorder => 0)
+    
+    #Change starting letter to enter to quick test
+    @texts[@index].color = ::Gosu::Color::WHITE
+    @index = 55
+    @texts[@index].color = ::Gosu::Color::RED
+    
+    @back_button = Chingu::PressButton.create(:x => 100, :y => 500, 
+    :button_image => "./media/menu/back-button.png") 
+    @text = Text.create("Pick a name for player #{options[:c_players]}:", :x => 300, :y => 50 )
+    
+    @back_button.on_release do
+      push_game_state(Number_Players)
     end    
+  end
+  
+  def go
+    @callback.call(@name.text)
+  end
+  
+end 
+
+class Car_Selection < Chingu::GameState
+  def initialize(options = {})
+    super 
+    @players_name = options[:players_name] 
+    n_players = @players_name.length 
+    @background = GameObject.create(:image => "./media/menu/menu-background.png", 
+    :rotation_center => :top_left)
+    @back_button = Chingu::PressButton.create(:x => 100, :y => 500, 
+    :button_image => "./media/menu/back-button.png")
+    
+    @back_button.on_release do
+      push_game_state(Entry_Menu)
+    end
+    i = 0
+    @text = Text.create("#{@players_name[i]} pick a car", :x => 300, :y => 50 )
+    @players_cars = []
+    j = 0
+    #Read al file names in map 
+    @car_dir = "./media/graphics/cars/"
+    Dir.entries(@car_dir).each do |file| 
+      if file.include? ".png" and not file.include? "~"
+        Text.create(file.gsub(".png",""), :x => 300, :y => 100 + j )
+        button = Chingu::PressButton.create(:x => 400, :y => 105 + j, 
+        :button_image => @car_dir + file) 
+        
+        button.on_release do
+          @players_cars.push @car_dir + file
+          @text.destroy
+          i += 1
+          if i == n_players
+            player_info = [@players_name, @players_cars]
+            push_game_state(Map_Select.new(:players => player_info))
+          end
+          @text = Text.create("#{@players_name[i]} pick a car", 
+          :x => 300, :y => 50 )
+        end
+        
+        j += 60
+      end     
+    end 
   end
 end  
 
@@ -138,7 +226,8 @@ class Map_Select < Chingu::GameState
         :button_image => "./media/menu/play-map-button.png") 
         
         button.on_release do
-          push_game_state(Play_Map.new(:map => file))
+          push_game_state(Play_Map.new(:map => file, 
+          :players => options[:players]))
         end
         j += 60
       end     
@@ -156,62 +245,64 @@ class Play_Map < Chingu::GameState
     size_y = 50
     file_type = ".png"
     map_file = File.open "./maps/" + map, "r"
+    location = "./media/graphics/squares/"
     map_file.each_line do |line|
       line.chomp!
       case line.split(" ")[0] 
         when "up"
           type = "vertical"
           current_y = current_y - size_y
-          square_image = "./media/graphics/vertical" 
+          square_image = "vertical" 
         when "down" 
           type = "vertical"
           current_y = current_y + size_y  
-          square_image = "./media/graphics/vertical"           
+          square_image = "vertical"           
         when "left"
           type = "horizontal"
           current_x = current_x - size_x         
-          square_image = "./media/graphics/horizontal"  
+          square_image = "horizontal"  
         when "right"
           type = "horizontal"
           current_x = current_x + size_x         
-          square_image = "./media/graphics/horizontal"           
+          square_image = "horizontal"           
         when "right-down"
           type = "right-down"
           current_x = current_x - size_x               
-          square_image = "./media/graphics/turn-down-right"
+          square_image = "turn-down-right"
         when "down-right"
           type = "right-down"
           current_y = current_y - size_y    
-          square_image = "./media/graphics/turn-down-right"          
+          square_image = "turn-down-right"          
         when "left-down"
           type = "left-down"
           current_x = current_x + size_x 
-          square_image = "./media/graphics/turn-left-down"    
+          square_image = "turn-left-down"    
         when "down-left"
           type = "left-down"
           current_y = current_y - size_y  
-          square_image = "./media/graphics/turn-left-down"            
+          square_image = "turn-left-down"            
         when "left-up"
           type = "left-up"
           current_x = current_x + size_x  
-          square_image = "./media/graphics/turn-left-top"  
+          square_image = "turn-left-top"  
         when "up-left"
           type = "left-up"
           current_y = current_y + size_y  
-          square_image = "./media/graphics/turn-left-top" 
+          square_image = "turn-left-top" 
         when "right-up"
           type = "right-up"
           current_x = current_x - size_x  
-          square_image = "./media/graphics/turn-top-right"                      
+          square_image = "turn-top-right"                      
         when "up-right"
           type = "right-up"
           current_y = current_y + size_y 
-          square_image = "./media/graphics/turn-top-right"           
+          square_image = "turn-top-right"           
         else
           puts "Corrupted file map, unexpected #{line.split(" ")[0]}\n"
           return
       end
-        square_image += line.split(" ")[1] + line.split(" ")[2] + file_type
+        square_image = location + square_image + line.split(" ")[1] + 
+        line.split(" ")[2] + file_type
         square = Square.new
         square.button = PressButton.create(:x => current_x.to_i, :y => current_y.to_i, 
           :button_image => square_image) 
@@ -225,14 +316,20 @@ class Play_Map < Chingu::GameState
   def place_players players
     #Set turns randomly
     @player_turn = []
-    c_players = Array.new(players)
+    @players = []
+    c_players = players.clone
+    #Asociate every player with its car
+    c_players = c_players.transpose
     n_players = c_players.length
     n_players.times do 
       #Pick a player randomly
       player = c_players.sample
       c_players.delete player
+      #Create player
+      @players.push Player.create(:name => player[0], 
+      :car_image => player[1])
       #Insert it in turn queue
-      @player_turn.push [player]     
+      @player_turn.push [@players.last]     
     end
     
     #Place players on the map
@@ -261,19 +358,13 @@ class Play_Map < Chingu::GameState
     super
     @background = GameObject.create(:image => "./media/menu/menu-background.png", 
     :rotation_center => :top_left)
-    @back_button = Chingu::PressButton.create(:x => 100, :y => 500, 
-    :button_image => "./media/menu/back-button.png")
-    
-    @back_button.on_release do
-      push_game_state(Map_Select)
-    end    
     
     create_map options[:map]
-    @players = []
-    @players.push Player.create(:name => "Pepe", :car_image => "./media/graphics/car1.png")
-    @players.push Player.create(:name => "Juan", :car_image => "./media/graphics/car2.png")
-    @players.push Player.create(:name => "Andres", :car_image => "./media/graphics/car3.png")
-    place_players @players
+    #@players = []
+    #@players.push Player.create(:name => "Pepe", :car_image => "./media/graphics/cars/car1.png")
+    #@players.push Player.create(:name => "Juan", :car_image => "./media/graphics/cars/car2.png")
+    #@players.push Player.create(:name => "Andres", :car_image => "./media/graphics/cars/car3.png")
+    place_players options[:players]
     
     current_player = @player_turn[0][0]
     #Create the player interface
@@ -290,7 +381,14 @@ class Play_Map < Chingu::GameState
     @gasoline_text = Chingu::Text.create(:text=> current_player.current_gas.to_s , :x => 105, :y => 560)
     @boost_text = Chingu::Text.create(:text=> current_player.main_boost.to_s , :x => 90, :y => 530)
     @dice_text = Chingu::Text.create(:text=> "" , :x => 420, :y => 540)
-    hide_game_object @dice_text    
+    hide_game_object @dice_text   
+    
+    @back_button = Chingu::PressButton.create(:x => 100, :y => 510, 
+    :button_image => "./media/menu/back-button.png")
+    
+    @back_button.on_release do
+      push_game_state(Entry_Menu)
+    end     
   end
 end  
 
