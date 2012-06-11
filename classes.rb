@@ -66,8 +66,7 @@ class Square
     @type = nil
     @size_x = 12
     @size_y = 12
-    @lane_offset = 5
-    @extra_offset = 15
+    @lane_offset = 6
   end
   
   def player_coord
@@ -80,22 +79,22 @@ class Square
     case @type
     when "vertical"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y - @extra_offset
+      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset 
     when "horizontal"
-      x = @button.y
-      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset - @extra_offset          
+      x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
+      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset           
     when "right-down"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset - @extra_offset         
+      y = @button.y + @size_y*@used_lanes - (@n_lanes - 1)*@lane_offset          
     when "left-down"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset - @extra_offset       
+      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset        
     when "left-up"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y + @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset - @extra_offset      
+      y = @button.y + @size_y*@used_lanes - (@n_lanes - 1)*@lane_offset       
     when "right-up"
       x = @button.x + @size_x*@used_lanes - (@n_lanes - 1)*@lane_offset
-      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offse - @extra_offset      
+      y = @button.y - @size_y*@used_lanes + (@n_lanes - 1)*@lane_offset      
     end
     return {:x => x, :y => y} 
   end

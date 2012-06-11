@@ -114,24 +114,32 @@ class Number_Players < Chingu::GameState
     
     @names_entered = 0
     @players_name = [] 
+    @message = "Pick a name for player 0:"
     @n_players_buttons.each_index do |i|
       @n_players_buttons[i].on_release do
         push_game_state(Name_Select.new(
-        :c_players => @names_entered + 1, :callback => method(:got_name)))
+        :message => @message, :callback => method(:got_name)))
         @n_players = i + 1
       end
     end   
   end
   
   def got_name name
-    @names_entered += 1 
-    @players_name.push name
-    if @names_entered == @n_players
-      push_game_state(Car_Selection.new(:players_name => @players_name))  
-      #push_game_state(Map_Select.new(:players_name => @players_name))  
+    if @players_name.include? name
+      @message = "Player #{@names_entered + 1}, pick another name:"
+      push_game_state(Name_Select.new(
+      :message => @message, :callback => method(:got_name)))      
     else
-    push_game_state(Name_Select.new(
-    :c_players => @names_entered + 1, :callback => method(:got_name)))
+      @names_entered += 1 
+      @players_name.push name
+      if @names_entered == @n_players
+        push_game_state(Car_Selection.new(:players_name => @players_name))  
+        #push_game_state(Map_Select.new(:players_name => @players_name))  
+      else
+      @message = "Pick a name for player #{@names_entered + 1}:"
+      push_game_state(Name_Select.new(
+      :message => @message, :callback => method(:got_name)))
+      end        
     end
   end 
 end  
@@ -149,7 +157,7 @@ class Name_Select < GameStates::EnterName
     
     @back_button = Chingu::PressButton.create(:x => 100, :y => 500, 
     :button_image => "./media/menu/back-button.png") 
-    @text = Text.create("Pick a name for player #{options[:c_players]}:", :x => 300, :y => 50 )
+    @text = Text.create(options[:message], :x => 300, :y => 50 )
     
     @back_button.on_release do
       push_game_state(Number_Players)
@@ -307,7 +315,8 @@ class Play_Map < Chingu::GameState
         square.button = PressButton.create(:x => current_x.to_i, :y => current_y.to_i, 
           :button_image => square_image) 
         square.button.active = false  
-        square.type = type 
+        square.type = type
+        square.n_lanes = line.split(" ")[1].to_i 
         @map.push square 
     end 
     map_file.close      
@@ -387,7 +396,7 @@ class Play_Map < Chingu::GameState
     :button_image => "./media/menu/back-button.png")
     
     @back_button.on_release do
-      push_game_state(Entry_Menu)
+      push_game_state(Map_Select.new(:players => options[:players]))
     end     
   end
 end  
