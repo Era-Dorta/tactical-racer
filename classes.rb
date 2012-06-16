@@ -56,7 +56,11 @@ class Boost_Card
 end
 
 class Square
-  attr_accessor :n_lanes, :button, :type
+  #TODO Redo the player positionting, a vector of free
+  #lines is needed, previous_square is needed for
+  #when the user rolls many ones
+  attr_accessor :n_lanes, :button, :type, :index,
+  :next_square
   def initialize
     @button = nil
     @n_lanes = 3
@@ -67,6 +71,12 @@ class Square
     @size_x = 12
     @size_y = 12
     @lane_offset = 6
+    @index = 0
+    @next_square = nil
+  end
+  
+  def new_player?
+      return @used_lanes < @n_lanes
   end
   
   def player_coord
@@ -115,6 +125,10 @@ class Square
     end  
   end
   
+  def next_square
+    return @next_square
+  end
+  
 end
 
 class Boxes_Square < Square
@@ -131,11 +145,13 @@ end
 class Player < Chingu::GameObject
    attr_accessor :tyre_change, :map, :current_square
    attr_reader :current_gas, :main_boost
+   trait :velocity
   def initialize(options = {})
     super
    
     @last_dice_roll = nil
-    @current_square = 0
+    @current_square = nil
+    @transitional_square = nil
     @current_gas = 300
     @tyre_change = false
     @main_boost = 20
@@ -146,19 +162,34 @@ class Player < Chingu::GameObject
     @crashed = false
     @boost_cards = []
     @map = nil
- 
+    @final_x = 0
+    @final_y = 0
+    
     @image = Image[options[:car_image]]
+    @position_offset = 0.1
+    @speed_factor = 0.05
     self.factor_x = 0.3
     self.factor_y = 0.3
   end
   
-  def move movement, boost_cards
-    #TODO make player move
+  def move_car new_square, boost_cards = nil
+    #TODO Include boost cards
+    if boost_cards
+      puts "Not boost cards implemented yet\n"
+    else
+      @current_square.player_out
+      @transitional_square = @current_square.next_square
+      position = @transitional_square.player_coord
+      @velocity_x = (position[:x] - @x)*@speed_factor
+      @velocity_y = (position[:y] - @y)*@speed_factor
+      @final_x = position[:x]
+      @final_y = position[:y]      
+      @current_square = new_square         
+    end   
   end
   
   def roll_dice
     @last_dice_roll = RG.get_rand(1..6)
-    @dice_record[@last_dice_roll] += 1
     
     #If player got six times one move him back
     if @dice_record[1] == 6
@@ -172,7 +203,47 @@ class Player < Chingu::GameObject
       @boost_cards.push RG.get_rand(1..6)
       @dice_record[6] = 0
       #TODO Update view
+    end    
+    return @last_dice_roll
+  end
+  
+  def update 
+    #TODO Create an nicer animations
+    if @velocity_x != 0 or @velocity_y != 0   
+      if (@final_x - @position_offset..@final_x + @position_offset).include? @x and 
+        (@final_y - @position_offset..@final_y + @position_offset).include? @y then
+        if @transitional_square == @current_square
+          @velocity_x = 0
+          @velocity_y = 0  
+          @current_square.player_in       
+        else
+          @transitional_square = @transitional_square.next_square
+          position = @transitional_square.player_coord
+          @velocity_x = (position[:x] - @x)*@speed_factor
+          @velocity_y = (position[:y] - @y)*@speed_factor 
+          @final_x = position[:x]
+          @final_y = position[:y]       
+        end    
+      end
+    end  
+  end
+  
+end
+
+#Standard game state has a background and a back button
+#that lets the user go to Entry_Menu
+class BackGameState < Chingu::GameState
+  def initialize(options = {})
+    super
+    #The background must go in the background, so zorder minimum
+    @background = GameObject.create(:image => "./media/menu/menu-background.png", 
+    :rotation_center => :top_left, :zorder => 0)
+    #The back button is always visible, so zorder over than average
+    @back_button = Chingu::PressButton.create(:x => 100, :y => 510, 
+    :button_image => "./media/menu/back-button.png", :zorder => 110)
+    
+    @back_button.on_release do
+      push_game_state(Entry_Menu)
     end      
   end
 end
-
