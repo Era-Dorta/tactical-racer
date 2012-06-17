@@ -83,6 +83,7 @@ class Entry_Menu < Chingu::GameState
     end    
     
     @multiplayerButton.on_release do
+      #Fast going to play game for development purposes
       player1 = [["Bla"],
           ["./media/graphics/cars/car1.png"]]
       player2 = [["Bla", "Bli"],
@@ -97,20 +98,21 @@ class Entry_Menu < Chingu::GameState
   end
 end  
 
-
-
+#State to set number of players
 class Number_Players < BackGameState
   def initialize(options = {})
     super
     Text.create("Choose number of players", :x => 300, :y => 50 )
     @n_players_buttons = []
     j = 0
+    #Maximun six players
     6.times do |i|
       @n_players_buttons.push Chingu::PressButton.create(:x => 370, :y => 100 + j, 
       :button_image => "./media/menu/" +(i + 1).to_s + "-button.png")
       j += 50
     end
     
+    #Name selection from next state
     @names_entered = 0
     @players_name = [] 
     @message = "Pick a name for player 1:"
@@ -123,6 +125,7 @@ class Number_Players < BackGameState
     end   
   end
   
+  #Next state will call this funtion every time a name is given
   def got_name name
     if @players_name.include? name
       @message = "Player #{@names_entered + 1}, pick another name:"
@@ -143,6 +146,8 @@ class Number_Players < BackGameState
   end 
 end  
 
+#State that allows player to select theirs name
+#TODO create my own awesome EnterName
 class Name_Select < GameStates::EnterName
   def initialize(options = {})
     super
@@ -170,6 +175,7 @@ class Name_Select < GameStates::EnterName
   
 end 
 
+#State that allows players to select which car they want
 class Car_Selection < BackGameState
   def initialize(options = {})
     super 
@@ -205,6 +211,7 @@ class Car_Selection < BackGameState
   end
 end  
 
+#Map selection from map files
 class Map_Select < BackGameState
   def initialize(options = {})
     super
@@ -232,134 +239,6 @@ end
 #Cars is a vector of car files
 class Play_Map < BackGameState
   
-  def create_map map
-    @map = []
-    current_x = 100
-    #current_y = 30    
-    current_y = 70  
-    size_x = 50
-    size_y = 50
-    i = 0
-    previous_square = nil
-    file_type = ".png"
-    map_file = File.open "./maps/" + map, "r"
-    location = "./media/graphics/squares/"
-    map_file.each_line do |line|
-      line.chomp!
-      case line.split(" ")[0] 
-        when "up"
-          type = "vertical"
-          current_y = current_y - size_y
-          square_image = "vertical" 
-        when "down" 
-          type = "vertical"
-          current_y = current_y + size_y  
-          square_image = "vertical"           
-        when "left"
-          type = "horizontal"
-          current_x = current_x - size_x         
-          square_image = "horizontal"  
-        when "right"
-          type = "horizontal"
-          current_x = current_x + size_x         
-          square_image = "horizontal"           
-        when "right-down"
-          type = "right-down"
-          current_x = current_x - size_x               
-          square_image = "turn-down-right"
-        when "down-right"
-          type = "right-down"
-          current_y = current_y - size_y    
-          square_image = "turn-down-right"          
-        when "left-down"
-          type = "left-down"
-          current_x = current_x + size_x 
-          square_image = "turn-left-down"    
-        when "down-left"
-          type = "left-down"
-          current_y = current_y - size_y  
-          square_image = "turn-left-down"            
-        when "left-up"
-          type = "left-up"
-          current_x = current_x + size_x  
-          square_image = "turn-left-top"  
-        when "up-left"
-          type = "left-up"
-          current_y = current_y + size_y  
-          square_image = "turn-left-top" 
-        when "right-up"
-          type = "right-up"
-          current_x = current_x - size_x  
-          square_image = "turn-top-right"                      
-        when "up-right"
-          type = "right-up"
-          current_y = current_y + size_y 
-          square_image = "turn-top-right"           
-        else
-          puts "Corrupted file map, unexpected #{line.split(" ")[0]}\n"
-          return
-      end
-        square_image = location + square_image + line.split(" ")[1] + 
-        line.split(" ")[2] + file_type
-        square = Square.new
-        square.button = PressButton.create(:x => current_x.to_i, :y => current_y.to_i, 
-          :button_image => square_image) 
-        square.button.active = false  
-        square.type = type
-        square.index = i
-        square.n_lanes = line.split(" ")[1].to_i 
-        @map.push square 
-        if i > 0
-          previous_square.next_square = square
-        end
-        i += 1
-        previous_square = square
-    end 
-    @map.last.next_square = @map.first
-    map_file.close      
-  end
-  
-  def place_players players
-    #Set turns randomly
-    @player_turn = []
-    @players = []
-    c_players = players.clone
-    #Asociate every player with its car
-    c_players = c_players.transpose
-    n_players = c_players.length
-    n_players.times do 
-      #Pick a player randomly
-      player = c_players.sample
-      c_players.delete player
-      #Create player
-      @players.push Player.create(:name => player[0], 
-      :car_image => player[1])
-      #Insert it in turn queue
-      @player_turn.push [@players.last]     
-    end
-    
-    #Place players on the map
-    i = 0
-    current_square = @map[i]
-    @player_turn.each do |turn|
-      turn.each do |player|
-        #Ask current square for a player position on it
-        player_pos = current_square.player_coord
-        #If there is not position, go to next square
-        if player_pos == nil
-          i = (i - 1) % @map.length
-          current_square = @map[i]
-          player_pos = current_square.player_coord
-        end
-        #Place player on its square
-        player.x = player_pos[:x]
-        player.y = player_pos[:y]
-        player.current_square = current_square
-        current_square.player_in
-      end
-    end    
-  end
-  
   def create_player_interface
     #Create the player interface
     @interface_back = GameObject.create(:image => "./media/menu/interface-background.png", 
@@ -385,7 +264,9 @@ class Play_Map < BackGameState
   
   def set_game_logic
     #TODO Game is more complicated, cards, etc
-    @map.each do |square|
+    
+    #Basic mechanic is: roll dice, then pick a square
+    @map.each_square do |square|
       square.button.on_release do
         #Deactivate the squares
         @dice_result.times do |j|
@@ -428,8 +309,8 @@ class Play_Map < BackGameState
     @back_button.on_release do
       push_game_state(Map_Select.new(:players => options[:players]))
     end   
-    create_map options[:map]
-    place_players options[:players]
+    @map = Map.new options[:map]
+    @player_turn = @map.place_players options[:players]
     @current_player = @player_turn[0][0] 
     create_player_interface
     set_game_logic
