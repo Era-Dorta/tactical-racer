@@ -11,10 +11,10 @@
 # This game is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# Lesser General Public License for more details.
+# General Public License for more details.
 #
 # You should have received a copy of the GNU General Public
-# License along with this library; if not, write to the Free Software
+# License along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #++
@@ -84,6 +84,7 @@ class Entry_Menu < Chingu::GameState
     
     @multiplayerButton.on_release do
       #Fast going to play game for development purposes
+=begin      
       player1 = [["Bla"],
           ["./media/graphics/cars/car1.png"]]
       player2 = [["Bla", "Bli"],
@@ -93,7 +94,8 @@ class Entry_Menu < Chingu::GameState
             "./media/graphics/cars/car3.png",]]            
       push_game_state(Play_Map.new(:map => "map2.map", 
           :players => player3))
-      #push_game_state(Number_Players)
+=end          
+      push_game_state(Number_Players)
     end
   end
 end  
@@ -113,67 +115,87 @@ class Number_Players < BackGameState
     end
     
     #Name selection from next state
-    @names_entered = 0
-    @players_name = [] 
-    @message = "Pick a name for player 1:"
     @n_players_buttons.each_index do |i|
       @n_players_buttons[i].on_release do
-        push_game_state(Name_Select.new(
-        :message => @message, :callback => method(:got_name)))
-        @n_players = i + 1
+        push_game_state(Name_Select.new(:n_players => i + 1))        
       end
     end   
   end
   
-  #Next state will call this funtion every time a name is given
-  def got_name name
-    if @players_name.include? name
-      @message = "Player #{@names_entered + 1}, pick another name:"
-      push_game_state(Name_Select.new(
-      :message => @message, :callback => method(:got_name)))      
-    else
-      @names_entered += 1 
-      @players_name.push name
-      if @names_entered == @n_players
-        push_game_state(Car_Selection.new(:players_name => @players_name))  
-        #push_game_state(Map_Select.new(:players_name => @players_name))  
-      else
-      @message = "Pick a name for player #{@names_entered + 1}:"
-      push_game_state(Name_Select.new(
-      :message => @message, :callback => method(:got_name)))
-      end        
-    end
-  end 
 end  
 
 #State that allows player to select theirs name
-#TODO create my own awesome EnterName
-class Name_Select < GameStates::EnterName
+#TODO Add numbers to posible caracters, show a name list
+class Name_Select < BackGameState
   def initialize(options = {})
     super
-    
-    @background = GameObject.create(:image => "./media/menu/menu-background.png", 
-    :rotation_center => :top_left, :zorder => 0)
-    
-    #Change starting letter to enter to quick test
-    @texts[@index].color = ::Gosu::Color::WHITE
-    @index = 55
-    @texts[@index].color = ::Gosu::Color::RED
-    
-    @back_button = Chingu::PressButton.create(:x => 100, :y => 500, 
-    :button_image => "./media/menu/back-button.png") 
-    @text = Text.create(options[:message], :x => 300, :y => 50 )
-    
-    @back_button.on_release do
-      push_game_state(Number_Players)
-    end    
+    @message = "Pick a name for player 1:"
+    @n_players = options[:n_players]
+    reset
+    @names_entered = 0
+    @players_name = []     
+    #Set all alphabetical caracters as input
+    input = {}
+    (:a..:z).each do |i|
+      input[i] = lambda{get_letter(i)}
+    end
+    input[:space] = lambda{get_letter(:space)}
+    input[:backspace] = lambda{get_letter(:backspace)}
+    input[:return] = :go
+    self.input = input
   end
   
+  #Reset the state
+  def reset
+    @text.destroy if @text
+    @name.destroy if @name
+    @name_string = ""
+    @name_array = []
+    
+    @text = Text.create(@message, :x => 300, :y => 50 )
+    @name = Text.create("", :x => $window.width/2, 
+    :y => 60, :size => 80)     
+  end
+        
+  #Go here every time a player pushes a letter      
+  def get_letter value
+    case value
+    when :a..:z
+      @name_string << value.to_s.upcase
+      @name_array << value
+    when :space
+      @name_string << " " 
+      @name_array << " "  
+    when :backspace
+      @name_string.chop!
+      @name_array.pop
+    end
+    @name.text = @name_array.join
+    @name.x = $window.width/2 - @name.width/2    
+  end 
+  
+  #On enter the name is captured
   def go
-    @callback.call(@name.text)
-  end
-  
-end 
+    #Name is repeated
+    if @players_name.include? @name_string
+      @message = "Player #{@names_entered + 1}, pick another name:"
+      reset     
+    else
+      #Name is not repeated
+      @names_entered += 1 
+      @players_name.push @name_string
+      #This was last name, go to car selection
+      if @names_entered == @n_players
+        push_game_state(Car_Selection.new(:players_name => @players_name))   
+      else
+        #There are more names to be readed
+        @message = "Pick a name for player #{@names_entered + 1}:"
+        reset
+      end        
+    end    
+  end  
+    
+end
 
 #State that allows players to select which car they want
 class Car_Selection < BackGameState
@@ -190,9 +212,11 @@ class Car_Selection < BackGameState
     Dir.entries(@car_dir).each do |file| 
       if file.include? ".png" and not file.include? "~"
         Text.create(file.gsub(".png",""), :x => 300, :y => 100 + j )
+        #button = Chingu::PressButton.create(:x => 400, :y => 105 + j, 
+        #:button_image => @car_dir + file) 
         button = Chingu::PressButton.create(:x => 400, :y => 105 + j, 
-        :button_image => @car_dir + file) 
-        
+        :button_animation => @car_dir + file, :size => [50,50])
+                 
         button.on_release do
           @players_cars.push @car_dir + file
           @text.destroy
