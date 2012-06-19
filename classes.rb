@@ -56,9 +56,6 @@ class Boost_Card
 end
 
 class Square
-  #TODO Redo the player positionting, a vector of free
-  #lines is needed, previous_square is needed for
-  #when the user rolls many ones
   attr_reader :button, :index,
   :next_square, :previous_square
   def initialize(options = {})
@@ -227,6 +224,7 @@ class Player < Chingu::GameObject
   
   #Move the player to a given square
   def move_car new_square, boost_cards = nil
+    #TODO Decrease current_gas, check lap
     #TODO Include boost cards
     if boost_cards
       puts "Not boost cards implemented yet\n"
@@ -260,7 +258,6 @@ class Player < Chingu::GameObject
       end while i < goes_back and new_square.new_player?
       #If last square is full, advance one
       if not new_square.new_player?
-        puts "en la ultima no se pudo"
         new_square = new_square.next_square
         i -= 1
       end        
@@ -296,7 +293,7 @@ class Player < Chingu::GameObject
   
   def update 
     #TODO Create better animations
-    #Go to next frame
+    #Go to next frame of the animation
     @image = @animation.next  if @animation
     #If the player is moving?
     if @velocity_x != 0 or @velocity_y != 0 

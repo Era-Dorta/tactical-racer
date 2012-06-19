@@ -41,7 +41,8 @@ end
 
 class Game < Chingu::Window
   def initialize
-    super(800,600,false)
+    @full_screen = false
+    super(800,600,@full_screen)
     #Show cursor
     $window.cursor = true
     #On scape key pop esc menu
@@ -84,7 +85,7 @@ class Entry_Menu < Chingu::GameState
     
     @multiplayerButton.on_release do
       #Fast going to play game for development purposes
-=begin      
+     
       player1 = [["Bla"],
           ["./media/graphics/cars/car1.png"]]
       player2 = [["Bla", "Bli"],
@@ -94,8 +95,8 @@ class Entry_Menu < Chingu::GameState
             "./media/graphics/cars/car3.png",]]            
       push_game_state(Play_Map.new(:map => "map2.map", 
           :players => player3))
-=end          
-      push_game_state(Number_Players)
+          
+      #push_game_state(Number_Players)
     end
   end
 end  
@@ -125,7 +126,7 @@ class Number_Players < BackGameState
 end  
 
 #State that allows player to select theirs name
-#TODO Add numbers to posible caracters, show a name list
+#TODO Add numbers to posible caracters
 class Name_Select < BackGameState
   def initialize(options = {})
     super
@@ -133,7 +134,8 @@ class Name_Select < BackGameState
     @n_players = options[:n_players]
     reset
     @names_entered = 0
-    @players_name = []     
+    @players_name = []   
+    @players_name_text = Text.create("Players Names\n\n\n", :x => 50, :y => 50 )   
     #Set all alphabetical caracters as input
     input = {}
     (:a..:z).each do |i|
@@ -162,7 +164,7 @@ class Name_Select < BackGameState
     case value
     when :a..:z
       @name_string << value.to_s.upcase
-      @name_array << value
+      @name_array << value.upcase
     when :space
       @name_string << " " 
       @name_array << " "  
@@ -173,6 +175,14 @@ class Name_Select < BackGameState
     @name.text = @name_array.join
     @name.x = $window.width/2 - @name.width/2    
   end 
+  
+  def show_name_list
+    show_list = "Players Names\n\n\n"
+    @names_entered.times do |i|
+      show_list << "Player#{i+1}: " + @players_name[i] + "\n\n" 
+    end
+    @players_name_text.text = show_list
+  end
   
   #On enter the name is captured
   def go
@@ -192,7 +202,8 @@ class Name_Select < BackGameState
         @message = "Pick a name for player #{@names_entered + 1}:"
         reset
       end        
-    end    
+    end
+    show_name_list    
   end  
     
 end
@@ -282,8 +293,16 @@ class Play_Map < BackGameState
   
   def next_player
     #TODO Make a real next_player
-    @player_turn = @player_turn.rotate
-    @current_player = @player_turn[0][0]
+    if @current_player == @first_player
+      #TODO Order players accoding to their current square index
+      index = @players.rindex @current_player
+      @current_player = @players[(index + 1) % @players.length]            
+    else
+      index = @players.rindex @current_player
+      @current_player = @players[(index + 1) % @players.length]
+    end
+    #@player_turn = @player_turn.rotate
+    #@current_player = @player_turn[0][0]
   end
   
   def set_game_logic
@@ -334,8 +353,12 @@ class Play_Map < BackGameState
       push_game_state(Map_Select.new(:players => options[:players]))
     end   
     @map = Map.new options[:map]
-    @player_turn = @map.place_players options[:players]
-    @current_player = @player_turn[0][0] 
+    #@player_turn = @map.place_players options[:players]
+    #@current_player = @player_turn[0][0]
+    @players = @map.place_players options[:players] 
+    @players.flatten!
+    @current_player = @players[0]
+    @first_player = @players[0]
     create_player_interface
     set_game_logic
   end
