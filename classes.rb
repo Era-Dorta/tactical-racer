@@ -235,6 +235,7 @@ class Player < Chingu::GameObject
       @current_square.player_out self
       set_movement
       @current_square = new_square  
+      @sound = Sound["./media/music/car_engine.ogg"].play(1)
       #Delete any warning that was shown on rolling dice
       @back_text.destroy if @back_text       
     end   
@@ -244,7 +245,7 @@ class Player < Chingu::GameObject
     @last_dice_roll = RG.get_rand(1..6)
     @dice_record[@last_dice_roll] += 1
     #If player got six times one move him back
-    if @dice_record[1] == 6
+    if @dice_record[1] == 1
       #Reset dice record
       @dice_record[1] = 0
       #Calculate how far he must go
@@ -272,6 +273,7 @@ class Player < Chingu::GameObject
         @transitional_square = @current_square.previous_square
         @current_square.player_out self
         set_movement
+        @sound = Sound["./media/music/car_break.ogg"].play(1)
         @current_square = new_square 
       else
         #Player is lucky and cannot move back
@@ -297,14 +299,15 @@ class Player < Chingu::GameObject
     @image = @animation.next  if @animation
     #If the player is moving?
     if @velocity_x != 0 or @velocity_y != 0 
-      #Did the player got to the square hi is moving to?  
+      #Did the player got to the square he is moving to?  
       if (@final_x - @position_offset..@final_x + @position_offset).include? @x and 
         (@final_y - @position_offset..@final_y + @position_offset).include? @y then
         #Is this the last square?
         if @transitional_square == @current_square
           @velocity_x = 0
           @velocity_y = 0  
-          @current_square.player_in self   
+          @current_square.player_in self 
+          @sound.stop  
         else
           if @going_back
             @transitional_square = @transitional_square.previous_square 
