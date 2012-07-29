@@ -41,7 +41,7 @@ end
 
 class Game < Chingu::Window
   def initialize
-    @full_screen = false
+    @full_screen = true
     super(800,600,@full_screen)
     #Show cursor
     $window.cursor = true
@@ -85,7 +85,7 @@ class Entry_Menu < Chingu::GameState
     
     @multiplayerButton.on_release do
       #Fast going to play game for development purposes
-     
+=begin     
       player1 = [["Bla"],
           ["./media/graphics/cars/car1.png"]]
       player2 = [["Bla", "Bli"],
@@ -95,8 +95,8 @@ class Entry_Menu < Chingu::GameState
             "./media/graphics/cars/car3.png",]]            
       push_game_state(Play_Map.new(:map => "map2.map", 
           :players => player3))
-          
-      #push_game_state(Number_Players)
+=end          
+      push_game_state(Number_Players)
     end
   end
 end  
