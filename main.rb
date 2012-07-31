@@ -21,28 +21,20 @@
 
 require './classes.rb'
 
-class Escape_Menu < Chingu::GameState
-  def initialize(options = {})
-    super   
-    #On scape key return to where the user was
-    self.input = { :escape => :pop_game_state }
-    @level = GameObject.create(:image => "./media/menu/escape-menu-background.png",
-    :x => 400, :y => 300)
-
-    @exitButton = Chingu::PressButton.create(:x => 400, :y => 300,
-    :button_image => "./media/menu/exit-game-button.png")
-
-    @exitButton.on_release do
-      $window.close
-      exit
-    end
-  end
-end
-
 class Game < Chingu::Window
   def initialize
-    @full_screen = true
-    super(800,600,@full_screen)
+    @full_screen = false
+    super(800, 600, @full_screen)
+    #Calculate factor_x and _y according
+    #to screen size   
+    if @full_screen
+      $factor_x = 1
+      $factor_y = 1      
+    else
+      $factor_x = $window.width / 1980.0
+      $factor_y = $window.height / 1200.0      
+    end 
+      
     #Show cursor
     $window.cursor = true
     #On scape key pop esc menu
@@ -62,17 +54,36 @@ class Game < Chingu::Window
   end
 end
 
+class Escape_Menu < Chingu::GameState
+  def initialize(options = {})
+    super   
+    #On scape key return to where the user was
+    self.input = { :escape => :pop_game_state }
+    @level = FactorObject.create(:image => "./media/menu/escape-menu-background.png",
+    :x => 400, :y => 300)
+
+    @exitButton = FactorButton.create(:x => 400, :y => 300,
+    :button_image => "./media/menu/exit-game-button.png")
+
+    @exitButton.on_release do
+      $window.close
+      exit
+    end
+  end
+end
+
 class Entry_Menu < Chingu::GameState
   def initialize(options = {})
     super
     @song = Song["./media/music/cave.ogg"].play(true)
-    @background = GameObject.create(:image => "./media/menu/menu-background.png", 
-    :rotation_center => :top_left)
-    @soloButton = Chingu::PressButton.create(:x => 300, :y => 500, 
-    :button_image => "./media/menu/solo-game-button-unpressed.png")
-    @onlineButton = Chingu::PressButton.create(:x => 300, :y => 300, 
+    @background = FactorObject.create(:image => "./media/menu/menu-background.png", 
+    :rotation_center => :top_left, :factor_x => $factor_x, :factor_y => $factor_y)
+    @soloButton = FactorButton.create(:x => 300, :y => 500, 
+    :button_image => "./media/menu/solo-game-button-unpressed.png", 
+    :factor_x => $factor_x, :factor_y => $factor_y)
+    @onlineButton = FactorButton.create(:x => 300, :y => 300, 
     :button_image => "./media/menu/online-game-button-unpressed.png")   
-    @multiplayerButton = Chingu::PressButton.create(:x => 300, :y => 100, 
+    @multiplayerButton = FactorButton.create(:x => 300, :y => 100, 
     :button_image => "./media/menu/multiplayer-game-button-unpressed.png")
     
     @soloButton.on_release do
@@ -105,12 +116,12 @@ end
 class Number_Players < BackGameState
   def initialize(options = {})
     super
-    Text.create("Choose number of players", :x => 300, :y => 50 )
+    FactorText.create("Choose number of players", :x => 300, :y => 50 )
     @n_players_buttons = []
     j = 0
     #Maximun six players
     6.times do |i|
-      @n_players_buttons.push Chingu::PressButton.create(:x => 370, :y => 100 + j, 
+      @n_players_buttons.push FactorButton.create(:x => 370, :y => 100 + j, 
       :button_image => "./media/menu/" +(i + 1).to_s + "-button.png")
       j += 50
     end
@@ -135,7 +146,7 @@ class Name_Select < BackGameState
     reset
     @names_entered = 0
     @players_name = []   
-    @players_name_text = Text.create("Players Names\n\n\n", :x => 50, :y => 50 )   
+    @players_name_text = FactorText.create("Players Names\n\n\n", :x => 50, :y => 50 )   
     #Set all alphabetical caracters as input
     input = {}
     (:a..:z).each do |i|
@@ -154,8 +165,8 @@ class Name_Select < BackGameState
     @name_string = ""
     @name_array = []
     
-    @text = Text.create(@message, :x => 300, :y => 50 )
-    @name = Text.create("", :x => $window.width/2, 
+    @text = FactorText.create(@message, :x => 300, :y => 50 )
+    @name = FactorText.create("", :x => $window.width/2, 
     :y => 60, :size => 80)     
   end
         
@@ -215,18 +226,18 @@ class Car_Selection < BackGameState
     @players_name = options[:players_name] 
     n_players = @players_name.length 
     i = 0
-    @text = Text.create("#{@players_name[i]} pick a car", :x => 300, :y => 50 )
+    @text = FactorText.create("#{@players_name[i]} pick a car", :x => 300, :y => 50 )
     @players_cars = []
     j = 0
     #Read al file names in map 
     @car_dir = "./media/graphics/cars/"
     Dir.entries(@car_dir).each do |file| 
       if file.include? ".png" and not file.include? "~"
-        Text.create(file.gsub(".png",""), :x => 300, :y => 100 + j )
-        #button = Chingu::PressButton.create(:x => 400, :y => 105 + j, 
+        FactorText.create(file.gsub(".png",""), :x => 300, :y => 100 + j )
+        #button = FactorButton.create(:x => 400, :y => 105 + j, 
         #:button_image => @car_dir + file) 
-        button = Chingu::PressButton.create(:x => 400, :y => 105 + j, 
-        :button_animation => @car_dir + file, :size => [50,50])
+        button = FactorButton.create(:x => 400, :y => 105 + j, 
+        :button_animation => @car_dir + file)
                  
         button.on_release do
           @players_cars.push @car_dir + file
@@ -236,7 +247,7 @@ class Car_Selection < BackGameState
             player_info = [@players_name, @players_cars]
             push_game_state(Map_Select.new(:players => player_info))
           end
-          @text = Text.create("#{@players_name[i]} pick a car", 
+          @text = FactorText.create("#{@players_name[i]} pick a car", 
           :x => 300, :y => 50 )
         end
         
@@ -250,13 +261,13 @@ end
 class Map_Select < BackGameState
   def initialize(options = {})
     super
-    Text.create("Select a map", :x => 300, :y => 10)
+    FactorText.create("Select a map", :x => 300, :y => 10)
     j = 0
     #Read al file names in map 
     Dir.entries("./maps/").each do |file| 
       if file.include? ".map" and not file.include? "~"
-        Text.create(file.gsub(".map",""), :x => 300, :y => 50 + j )
-        button = Chingu::PressButton.create(:x => 400, :y => 55 + j, 
+        FactorText.create(file.gsub(".map",""), :x => 300, :y => 50 + j )
+        button = FactorButton.create(:x => 400, :y => 55 + j, 
         :button_image => "./media/menu/play-map-button.png") 
         
         button.on_release do
@@ -276,18 +287,18 @@ class Play_Map < BackGameState
   
   def create_player_interface
     #Create the player interface
-    @interface_back = GameObject.create(:image => "./media/menu/interface-background.png", 
+    @interface_back = FactorObject.create(:image => "./media/menu/interface-background.png", 
     :x => 400, :y => 550)
-    @dice_button = Chingu::PressButton.create(:x => 400, :y => 550, 
+    @dice_button = FactorButton.create(:x => 400, :y => 550, 
     :button_image => "./media/menu/roll-dice-button-unpressed.png")
-    @boost_label = Chingu::Text.create(:text=>"Boost:", :x => 50, :y => 530)
-    @gasoline_label = Chingu::Text.create(:text=>"Gasoline:", :x => 50, :y => 560)
-    @boost_cards_label = Chingu::Text.create(:text=> "Boost cards" , :x => 610, :y => 510)
-    @dice_label = Chingu::Text.create(:text=> "Dice result:" , :x => 350, :y => 540)
+    @boost_label = FactorText.create(:text=>"Boost:", :x => 50, :y => 530)
+    @gasoline_label = FactorText.create(:text=>"Gasoline:", :x => 50, :y => 560)
+    @boost_cards_label = FactorText.create(:text=> "Boost cards" , :x => 610, :y => 510)
+    @dice_label = FactorText.create(:text=> "Dice result:" , :x => 350, :y => 540)
     hide_game_object @dice_label
-    @gasoline_text = Chingu::Text.create(:text=> @current_player.current_gas.to_s , :x => 105, :y => 560)
-    @boost_text = Chingu::Text.create(:text=> @current_player.main_boost.to_s , :x => 90, :y => 530)
-    @dice_text = Chingu::Text.create(:text=> "" , :x => 420, :y => 540)
+    @gasoline_text = FactorText.create(:text=> @current_player.current_gas.to_s , :x => 105, :y => 560)
+    @boost_text = FactorText.create(:text=> @current_player.main_boost.to_s , :x => 90, :y => 530)
+    @dice_text = FactorText.create(:text=> "" , :x => 420, :y => 540)
     hide_game_object @dice_text        
   end
   

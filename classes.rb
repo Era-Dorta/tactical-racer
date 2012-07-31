@@ -27,6 +27,49 @@ require '../chingu/lib/chingu.rb'
 include Gosu
 include Chingu
 
+class FactorButton < Chingu::PressButton
+  def initialize(options = {})
+    if options[:x]
+      options[:x] = ($window.width / 1980.0)*options[:x]
+    end
+    if options[:y]   
+      options[:y] = ($window.height / 1200.0)*options[:y]
+    end    
+    options[:factor_x] = $factor_x
+    options[:factor_y] = $factor_y 
+    super           
+  end
+end
+
+class FactorObject < Chingu::GameObject
+  def initialize(options = {})    
+    if options[:x]
+      options[:x] = ($window.width / 1980.0)*options[:x]
+    end
+    if options[:y]   
+      options[:y] = ($window.height / 1200.0)*options[:y]
+    end    
+    options[:factor_x] = $factor_x
+    options[:factor_y] = $factor_y 
+    super 
+  end
+end
+
+class FactorText < Chingu::Text
+  def initialize(text, options = {})    
+    if options[:x]
+      options[:x] = ($window.width / 1980.0)*options[:x]
+    end
+    if options[:y]   
+      options[:y] = ($window.height / 1200.0)*options[:y]
+    end   
+    options[:size] = (($window.width / 1980.0)*80).round 
+    #options[:factor_x] = $factor_x
+    #options[:factor_y] = $factor_y 
+    super 
+  end
+end
+
 class Rand_Generator
   def initialize
     @time = Time.new.usec
@@ -47,7 +90,7 @@ RG = Rand_Generator.new
 class Boost_Card
   def initialize value, x, y
     @value = value
-    @image = PressButton.create(:x => x, :y => y, 
+    @image = FactorButton.create(:x => x, :y => y, 
           :button_image => "./media/boost_cards/card" + value.to_s + ".png")
     @image.on_click do
       #TODO do something xD
@@ -174,10 +217,10 @@ class Boxes_Square < Square
   end
 end
 
-class Player < Chingu::GameObject
+class Player < FactorObject
    attr_reader :current_gas, :main_boost, :current_square
    trait :velocity
-   trait :animation, :delay => 200, :size => [50,50]
+   trait :animation, :delay => 200
   def initialize(options = {})
     super   
     @last_dice_roll = nil
@@ -196,12 +239,12 @@ class Player < Chingu::GameObject
     @final_y = 0
     @going_back = false
 
-    @animation = Animation.new(:file => options[:car_image], :size => [50,50], :delay => 100)
+    @animation = Animation.new(:file => options[:car_image], :delay => 100)
     @image = @animation.first    
     @position_offset = 0.1
     @speed_factor = 0.05
-    self.factor_x = 0.3
-    self.factor_y = 0.3
+    #self.factor_x = 0.3
+    #self.factor_y = 0.3
   end
   
   #Set starting position in a lap
@@ -265,8 +308,7 @@ class Player < Chingu::GameObject
       #If player has to go back   
       if i != 0
         #Show warning
-        puts "creating text"
-        @back_text = Text.create("You got 6 times 1, \n you must go back #{i} squares", 
+        @back_text = FactorText.create("You got 6 times 1, \n you must go back #{i} squares", 
         :x => 300, :y => 50, :zorder => 120, :size => 20)
                   
         @going_back = true
@@ -278,8 +320,7 @@ class Player < Chingu::GameObject
       else
         #Player is lucky and cannot move back
         #Show warning
-        puts "creating text"
-        @back_text = Text.create("You got 6 times 1, \n but you do not have to go back", 
+        @back_text = FactorText.create("You got 6 times 1, \n but you do not have to go back", 
         :x => 300, :y => 50, :zorder => 120, :size => 20)                                      
       end       
     end
@@ -329,14 +370,18 @@ class Map
     @squares = []
     current_x = 100
     #current_y = 30    
-    current_y = 70  
-    size_x = 50
-    size_y = 50
+    current_y = 70
     i = 0
     previous_square = nil
     file_type = ".png"
     map_file = File.open "./maps/" + map, "r"
     location = "./media/graphics/squares/"
+    #Get width and height of a given square
+    test_square = Image[location + "horizontal11" + file_type]  
+    #size_x = 50
+    #size_y = 50
+    size_x = test_square.width
+    size_y = test_square.height    
     #Read the map file
     map_file.each_line do |line|
       line.chomp!
@@ -399,7 +444,7 @@ class Map
       gas_cost = line.split(" ")[2].to_i
       square_image = location + square_image + n_lanes.to_s + 
       gas_cost.to_s + file_type
-      button = PressButton.create(:x => current_x.to_i, :y => current_y.to_i, 
+      button = FactorButton.create(:x => current_x.to_i, :y => current_y.to_i, 
         :button_image => square_image) 
       square = Square.new(:type => type, :index => i, :n_lanes => n_lanes, 
       :button => button, :gas_cost => gas_cost ) 
@@ -487,14 +532,13 @@ class BackGameState < Chingu::GameState
   def initialize(options = {})
     super
     #The background must go in the background, so zorder minimum
-    @background = GameObject.create(:image => "./media/menu/menu-background.png", 
+    @background = FactorObject.create(:image => "./media/menu/menu-background.png", 
     :rotation_center => :top_left, :zorder => 0)
     #The back button is always visible, so zorder over than average
-    @back_button = Chingu::PressButton.create(:x => 100, :y => 510, 
+    @back_button = FactorButton.create(:x => 100, :y => 510, 
     :button_image => "./media/menu/back-button.png", :zorder => 110)
-    
     @back_button.on_release do
       push_game_state(Entry_Menu)
-    end      
+    end   
   end
 end
