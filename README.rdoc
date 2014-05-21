@@ -1,5 +1,4 @@
 = TACTICAL RACER
 
-
 == DESCRIPTION
-Computer cience final year project on development.
+Turn based formula 1 board game.
