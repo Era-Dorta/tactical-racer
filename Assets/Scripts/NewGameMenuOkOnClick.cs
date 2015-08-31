@@ -6,4 +6,5 @@ public class NewGameMenuOkOnClick : MonoBehaviour {
 	public void OnClick(){
 		Application.LoadLevel ("TemplateMap"); 
 	}
+
 }
