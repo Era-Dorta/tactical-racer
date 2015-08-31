@@ -4,6 +4,6 @@ using System.Collections;
 public class NewGameMenuOkOnClick : MonoBehaviour {
 
 	public void OnClick(){
-		Application.LoadLevel ("test0"); 
+		Application.LoadLevel ("TemplateMap"); 
 	}
 }
