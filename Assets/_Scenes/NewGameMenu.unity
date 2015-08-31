@@ -98,6 +98,7 @@ GameObject:
   - 222: {fileID: 60268452}
   - 114: {fileID: 60268451}
   - 114: {fileID: 60268450}
+  - 114: {fileID: 60268453}
   m_Layer: 5
   m_Name: Ok Button
   m_TagString: Untagged
@@ -161,7 +162,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 60268451}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 60268453}
+        m_MethodName: OnClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &60268451
@@ -191,6 +203,17 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 60268448}
+--- !u!114 &60268453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 60268448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0668f0bc342c4609902bc34650a3218, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &200976782
 GameObject:
   m_ObjectHideFlags: 0
